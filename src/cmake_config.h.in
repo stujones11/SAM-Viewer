@@ -1,0 +1,5 @@
+// Template for cmake_config.h
+
+#define D_ABOUT_LINK_URL "@PROJECT_LINK_URL@"
+#define D_ABOUT_LINK_TEXT "@PROJECT_LINK_TEXT@"
+#define D_VERSION "@VERSION_STRING@"
