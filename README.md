@@ -46,7 +46,7 @@ IRRLICHT_LIBRARY="/usr/local/lib/libIrrlicht.so"
 
 **Example:**
 ```
-cmake . -DIRRLICHT_LIBRARY="/usr/lib/libIrrlicht.so"`
+cmake . -DIRRLICHT_LIBRARY="/usr/lib/x86_64-linux-gnu/libIrrlicht.so"
 ```
 
 Controls
