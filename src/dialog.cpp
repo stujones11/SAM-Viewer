@@ -2,6 +2,10 @@
 #include <iostream>
 #include <irrlicht.h>
 
+#include "config.h"
+#include "scene.h"
+#include "dialog.h"
+
 #ifdef USE_CMAKE_CONFIG_H
 #include "cmake_config.h"
 #else
@@ -10,22 +14,18 @@
 #define D_VERSION "0.0.0"
 #endif
 
-#include "config.h"
-#include "scene.h"
-#include "dialog.h"
-
 static inline void open_url(std::string url)
 {
 	system((std::string("xdg-open \"") + url + std::string("\"")).c_str());
 }
 
 HyperlinkCtrl::HyperlinkCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-	const rect<s32> &rectangle, const wchar_t *title, std::string url) :
+	const rect<s32> &rectangle, std::string title, std::string url) :
 	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle),
 	url(url),
 	is_active(false)
 {
-	IGUIStaticText *text = env->addStaticText(title,
+	IGUIStaticText *text = env->addStaticText(stringw(title.c_str()).c_str(),
 		rect<s32>(0,0,rectangle.getWidth(),20), false, false, this);
 	text->setOverrideColor(SColor(255,0,0,255));
 	text->setTextAlignment(EGUIA_CENTER, EGUIA_CENTER);
@@ -77,7 +77,7 @@ ColorCtrl::ColorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	IGUIEditBox *edit = env->addEditBox(L"", rect<s32>(180,0,250,20), true,
 		this, E_DIALOG_ID_COLOR_EDIT);
 	edit->setMax(6);
-	edit->setToolTipText(L"Hex color string RRGGBB");
+	edit->setToolTipText(L"Hex color RRGGBB");
 
 	ITexture *texture = driver->findTexture("color_preview");
 	if (!texture)
@@ -148,7 +148,6 @@ AboutDialog::AboutDialog(IGUIEnvironment *env, IGUIElement *parent,
 	{
 		IGUIImage *image = env->addImage(rect<s32>(86,10,214,138), this);
 		image->setImage(icon);
-
 	}
 	ITexture *title = driver->findTexture("title.png");
 	if (!title)
@@ -164,9 +163,8 @@ AboutDialog::AboutDialog(IGUIEnvironment *env, IGUIElement *parent,
 		false, false, this);
 	text->setTextAlignment(EGUIA_CENTER, EGUIA_CENTER);
 
-	HyperlinkCtrl *link = new HyperlinkCtrl(env, this,
-		E_DIALOG_ID_ABOUT_LINK, rect<s32>(32,200,268,216),
-		stringw(D_ABOUT_LINK_TEXT).c_str(), D_ABOUT_LINK_URL);
+	HyperlinkCtrl *link = new HyperlinkCtrl(env, this, E_DIALOG_ID_ABOUT_LINK,
+		rect<s32>(32,200,268,216), D_ABOUT_LINK_TEXT, D_ABOUT_LINK_URL);
 	link->drop();
 
 	IGUIButton *button = env->addButton(rect<s32>(110,235,190,265), this,
@@ -334,7 +332,7 @@ TexturesDialog::TexturesDialog(IGUIEnvironment *env, IGUIElement *parent,
 	u32 mc_model = (model) ? model->getMaterialCount() : 0;
 	u32 mc_wield = (wield) ? wield->getMaterialCount() : 0;
 
-	for (s32 i = 0; i < 6; ++i)
+	for (u32 i = 0; i < 6; ++i)
 	{
 		s32 top = i * 30 + 20;
 		stringw num = stringw(i + 1);
@@ -418,7 +416,7 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 				ISceneNode *wield = smgr->getSceneNodeFromId(E_SCENE_ID_WIELD);
 				IGUIEditBox *edit;
 
-				for (s32 i = 0; i < 6; ++i)
+				for (u32 i = 0; i < 6; ++i)
 				{
 					std::string idx = std::to_string(i + 1);
 					edit = (IGUIEditBox*)

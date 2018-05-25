@@ -47,7 +47,7 @@ class HyperlinkCtrl : public IGUIElement
 {
 public:
 	HyperlinkCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-		const rect<s32> &rectangle, const wchar_t *title, std::string url);
+		const rect<s32> &rectangle, std::string title, std::string url);
 	virtual ~HyperlinkCtrl() {}
 	virtual void draw();
 	virtual bool OnEvent(const SEvent &event);
