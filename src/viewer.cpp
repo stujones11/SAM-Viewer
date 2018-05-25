@@ -468,7 +468,7 @@ bool Viewer::OnEvent(const SEvent &event)
 		}
 	}
 	else if (event.EventType == EET_KEY_INPUT_EVENT &&
-		event.KeyInput.PressedDown)
+		event.KeyInput.PressedDown && !gui->getFocused())
 	{
 		switch (event.KeyInput.Key)
 		{
@@ -545,7 +545,7 @@ bool Viewer::OnEvent(const SEvent &event)
 			else
 				fov = M_ZOOM_IN(fov);
 			setProjection();
-			break;
+			return true;
 		}
 		default:
 			break;

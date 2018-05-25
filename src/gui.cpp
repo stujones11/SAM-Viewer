@@ -421,31 +421,31 @@ void GUI::initToolBar()
 
 	IGUIToolBar *toolbar = env->addToolBar(0, E_GUI_ID_TOOLBAR);
 	text = env->addStaticText(L"Animation:",
-		rect<s32>(20,5,120,25), false, false, toolbar);
+		rect<s32>(20,6,120,25), false, false, toolbar);
 
 	text = env->addStaticText(L"Start",
-		rect<s32>(130,5,160,25), false, false, toolbar);
+		rect<s32>(130,6,160,25), false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(170,5,230,25),
 		true, toolbar, E_GUI_ID_ANIM_START);
 	spin->setDecimalPlaces(0);
 	spin->setRange(0, 10000);
 
 	text = env->addStaticText(L"End",
-		rect<s32>(255,5,280,25), false, false, toolbar);
+		rect<s32>(255,6,280,25), false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(290,5,350,25),
 		true, toolbar, E_GUI_ID_ANIM_END);
 	spin->setDecimalPlaces(0);
 	spin->setRange(0, 10000);
 
 	text = env->addStaticText(L"Speed",
-		rect<s32>(370,5,410,25), false, false, toolbar);
+		rect<s32>(370,6,410,25), false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(420,5,480,25),
 		true, toolbar, E_GUI_ID_ANIM_SPEED);
 	spin->setDecimalPlaces(0);
 	spin->setRange(0, 10000);
 
 	text = env->addStaticText(L"Frame",
-		rect<s32>(495,5,535,25), false, false, toolbar);
+		rect<s32>(495,6,535,25), false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(550,5,610,25),
 		true, toolbar, E_GUI_ID_ANIM_FRAME);
 	spin->setDecimalPlaces(0);
