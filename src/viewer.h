@@ -31,6 +31,7 @@ public:
 	AnimState(IGUIEnvironment *env);
 	void load(ISceneNode *node);
 	void update(ISceneNode *node);
+	void initField(s32 id, const u32 &max, const bool &enabled);
 	void setField(s32 id, const u32 &value);
 	void setState(s32 id) { state = id; }
 	u32 getField(s32 id);
@@ -38,11 +39,8 @@ public:
 	s32 getState() { return state; }
 
 private:
-	IGUIToolBar *getToolBar();
-
 	IGUIEnvironment *env;
 	u32 frame;
-	u32 max;
 	s32 state;
 };
 

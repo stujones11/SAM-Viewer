@@ -557,7 +557,6 @@ bool Viewer::OnEvent(const SEvent &event)
 AnimState::AnimState(IGUIEnvironment *env) :
 	env(env),
 	frame(0),
-	max(0),
 	state(E_ANIM_STATE_PAUSED)
 {}
 
@@ -567,39 +566,29 @@ void AnimState::load(ISceneNode *node)
 	if (!model)
 		return;
 
-	IGUIToolBar *toolbar = getToolBar();
-	if (!toolbar)
-		return;
-
-	max = model->getEndFrame();
-	model->setFrameLoop(0, 0);
+	s32 max = model->getEndFrame();
+	bool enabled = (max > 0);
 	state = E_ANIM_STATE_PAUSED;
+	model->setFrameLoop(0, 0);
+
+	initField(E_GUI_ID_ANIM_START, max, enabled);
+	initField(E_GUI_ID_ANIM_END, max, enabled);
+	initField(E_GUI_ID_ANIM_FRAME, max, enabled);
+	initField(E_GUI_ID_ANIM_SPEED, 60, enabled);
 
 	setField(E_GUI_ID_ANIM_START, 0);
 	setField(E_GUI_ID_ANIM_END, max);
 	setField(E_GUI_ID_ANIM_FRAME, 0);
 
-	bool enabled = (max > 0);
-	const list<IGUIElement*> &children = toolbar->getChildren();
-	list<IGUIElement*>::ConstIterator iter = children.begin();
-	while (iter != children.end())
+	IGUIElement *root = env->getRootGUIElement();
+	AnimCtrl *anim = (AnimCtrl*)
+		root->getElementFromId(E_GUI_ID_ANIM_CTRL, true);
+	anim->reset(enabled);
+	if (enabled)
 	{
-		if ((*iter)->getID() == E_GUI_ID_ANIM_CTRL)
-		{
-			AnimCtrl *anim = (AnimCtrl*)(*iter);
-			anim->reset(enabled);
-			if (enabled)
-			{
-				IGUIButton *button =
-					(IGUIButton*)anim->getElementFromId(E_GUI_ID_PAUSE, true);
-				button->setPressed(true);
-			}
-		}
-		else if ((*iter)->getType() != EGUIET_STATIC_TEXT)
-		{
-			(*iter)->setEnabled(enabled);
-		}
-		++iter;
+		IGUIButton *button =
+			(IGUIButton*)anim->getElementFromId(E_GUI_ID_PAUSE, true);
+		button->setPressed(true);
 	}
 }
 
@@ -610,31 +599,24 @@ void AnimState::update(ISceneNode *node)
 	setField(E_GUI_ID_ANIM_FRAME, frame);
 }
 
-IGUIToolBar *AnimState::getToolBar()
+void AnimState::initField(s32 id, const u32 &max, const bool &enabled)
 {
 	IGUIElement *root = env->getRootGUIElement();
-	return (IGUIToolBar*)root->getElementFromId(E_GUI_ID_TOOLBAR, true);
+	IGUISpinBox *spin = (IGUISpinBox*)root->getElementFromId(id, true);
+	spin->setRange(0, max);
+	spin->setEnabled(enabled);
 }
 
 u32 AnimState::getField(s32 id)
 {
-	IGUIToolBar *toolbar = getToolBar();
-	if (!toolbar)
-		return 0;
-
-	IGUISpinBox *spin;
-	spin = (IGUISpinBox*)toolbar->getElementFromId(id, true);
+	IGUIElement *root = env->getRootGUIElement();
+	IGUISpinBox *spin = (IGUISpinBox*)root->getElementFromId(id, true);
 	return spin->getValue();
 }
 
 void AnimState::setField(s32 id, const u32 &value)
 {
-	IGUIToolBar *toolbar = getToolBar();
-	if (!toolbar)
-		return;
-
-	IGUISpinBox *spin;
-	spin = (IGUISpinBox*)toolbar->getElementFromId(id, true);
-	spin->setRange(0, max);
-	spin->setValue(std::min(value, max));
+	IGUIElement *root = env->getRootGUIElement();
+	IGUISpinBox *spin = (IGUISpinBox*)root->getElementFromId(id, true);
+	spin->setValue(value);
 }
