@@ -40,7 +40,7 @@ public:
 	void setGridVisible(const bool &is_visible) { show_grid = is_visible; }
 	void setAxesVisible(const bool &is_visible) { show_axes = is_visible; }
 	void setDebugInfo(const bool &is_visible);
-	void rotate(s32 axis, const s32 &step);
+	void rotate(s32 axis, const f32 &step);
 	void refresh();
 	void jump();
 

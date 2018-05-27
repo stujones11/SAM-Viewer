@@ -218,22 +218,24 @@ void Scene::setDebugInfo(const bool &is_visible)
 	}
 }
 
-void Scene::rotate(s32 axis, const s32 &step)
+void Scene::rotate(s32 axis, const f32 &step)
 {
-	vector3df rot = getRotation();
+	matrix4 m, n;
+	m.setRotationDegrees(getRotation());
 	switch (axis)
 	{
 	case E_SCENE_AXIS_X:
-		rot.X = int(rot.X / step) * step + step;
+		n.setRotationDegrees(vector3df(step,0,0));
 		break;
 	case E_SCENE_AXIS_Y:
-		rot.Y = int(rot.Y / step) * step + step;
+		n.setRotationDegrees(vector3df(0,step,0));
 		break;
 	case E_SCENE_AXIS_Z:
-		rot.Z = int(rot.Z / step) * step + step;
+		n.setRotationDegrees(vector3df(0,0,step));
 		break;
 	}
-	setRotation(rot);
+	m *= n;
+	setRotation(m.getRotationDegrees());
 }
 
 void Scene::refresh()
