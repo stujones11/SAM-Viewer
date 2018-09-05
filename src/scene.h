@@ -52,6 +52,7 @@ public:
 
 private:
 	void loadTextures(ISceneNode *node, const std::string &prefix);
+	void clearTextures(ISceneNode *node, const std::string &prefix);
 
 	Config *conf;
 	bool show_grid;

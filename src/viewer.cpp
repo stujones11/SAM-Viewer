@@ -393,19 +393,20 @@ bool Viewer::OnEvent(const SEvent &event)
 				break;
 			case E_DIALOG_ID_SETTINGS_OK:
 				event.GUIEvent.Caller->getParent()->getParent()->remove();
-				gui->setFocused(false);
 				setBackgroundColor(conf->getHex("bg_color"));
 				scene->setGridColor(conf->getHex("grid_color"));
 				scene->setAttachment();
 				scene->setDebugInfo(conf->getBool("debug_info"));
+				gui->setFocused(false);
 				break;
 			case E_DIALOG_ID_SETTINGS_CANCEL:
+			case E_DIALOG_ID_TEXTURES_CANCEL:
+			case E_DIALOG_ID_ABOUT_OK:
 				event.GUIEvent.Caller->getParent()->getParent()->remove();
 				gui->setFocused(false);
 				break;
-			case E_DIALOG_ID_ABOUT_OK:
 			case E_DIALOG_ID_TEXTURES_OK:
-			case E_DIALOG_ID_TEXTURES_CANCEL:
+				scene->refresh();
 				event.GUIEvent.Caller->getParent()->getParent()->remove();
 				gui->setFocused(false);
 				break;

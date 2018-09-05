@@ -124,21 +124,45 @@ bool Scene::loadWieldMesh(const io::path &filename)
 	return true;
 }
 
+void Scene::clearTextures(ISceneNode *node, const std::string &prefix)
+{
+	for (u32 i = 0; i < node->getMaterialCount(); ++i)
+	{
+		SMaterial &material = node->getMaterial(i);
+		material.TextureLayer[0].Texture = 0;
+	}
+}
+
 void Scene::loadTextures(ISceneNode *node, const std::string &prefix)
 {
 	IVideoDriver *driver = SceneManager->getVideoDriver();
-	for (u32 i = 0; i < node->getMaterialCount(); ++i)
+	u32 material_count = node->getMaterialCount();
+	u32 texture_count = (material_count < 6) ? material_count : 5;
+	if (conf->getBool(prefix + "_texture_single"))
 	{
-		std::string key = prefix + "_texture_" + std::to_string(i + 1);
-		io::path fn = conf->getCStr(key);
+		io::path fn = conf->getCStr(prefix + "_texture_1");
 		ITexture *texture = driver->getTexture(fn);
 		if (texture)
-			driver->removeTexture(texture);
-		texture = driver->getTexture(fn);
-		if (texture)
 		{
-			SMaterial &material = node->getMaterial(i);
-			material.TextureLayer[0].Texture = texture;
+			for (u32 i = 0; i < material_count; ++i)
+			{
+				SMaterial &material = node->getMaterial(i);
+				material.TextureLayer[0].Texture = texture;
+			}
+		}
+	}
+	else
+	{
+		for (u32 i = 0; i < texture_count; ++i)
+		{
+			std::string key = prefix + "_texture_" + std::to_string(i + 1);
+			io::path fn = conf->getCStr(key);
+			ITexture *texture = driver->getTexture(fn);
+			if (texture)
+			{
+				SMaterial &material = node->getMaterial(i);
+				material.TextureLayer[0].Texture = texture;
+			}
 		}
 	}
 }
@@ -240,10 +264,34 @@ void Scene::rotate(s32 axis, const f32 &step)
 
 void Scene::refresh()
 {
+	IVideoDriver *driver = SceneManager->getVideoDriver();
+
+	// Important, clear all texture refs before removing.
 	ISceneNode *model = getNode(E_SCENE_ID_MODEL);
+	ISceneNode *wield = getNode(E_SCENE_ID_WIELD);
+	if (model)
+		clearTextures(model, "model");
+	if (wield)
+		clearTextures(wield, "wield");
+
+	// Remove all textures before reloading.
+	std::string prefix[] = {"model", "wield"};
+	for (u32 p = 0; p < 2; ++p)
+	{
+		for (u32 i = 0; i < 6; ++i)
+		{
+			std::string key = prefix[p] + "_texture_" + std::to_string(i + 1);
+			if (conf->hasKey(key))
+			{
+				io::path fn = conf->getCStr(key);
+				ITexture *texture = driver->getTexture(fn);
+				if (texture)
+					driver->removeTexture(texture);
+			}
+		}
+	}
 	if (model)
 		loadTextures(model, "model");
-	ISceneNode *wield = getNode(E_SCENE_ID_WIELD);
 	if (wield)
 		loadTextures(wield, "wield");
 }

@@ -527,11 +527,11 @@ void GUI::showTexturesDialog()
 {
 	IGUIEnvironment *env = device->getGUIEnvironment();
 	ISceneManager *smgr = device->getSceneManager();
-	IGUIWindow *window = env->addWindow(getWindowRect(400, 310),
+	IGUIWindow *window = env->addWindow(getWindowRect(400, 340),
 		true, L"Textures");
 
 	TexturesDialog *dialog = new TexturesDialog(env, window,
-		E_DIALOG_ID_TEXTURES, rect<s32>(0,20,400,310), conf, smgr);
+		E_DIALOG_ID_TEXTURES, rect<s32>(0,20,400,340), conf, smgr);
 	dialog->drop();
 }
 

@@ -315,31 +315,44 @@ TexturesDialog::TexturesDialog(IGUIEnvironment *env, IGUIElement *parent,
 	conf(conf),
 	smgr(smgr)
 {
-	IGUITabControl *tabs = env->addTabControl(rect<s32>(2,2,398,250), this,
+	IGUITabControl *tabs = env->addTabControl(rect<s32>(2,2,398,280), this,
 		true, true);
 
 	IGUITab *tab_model = tabs->addTab(L"Model");
 	IGUITab *tab_wield = tabs->addTab(L"Wield");
-	IGUIStaticText *text;
 	IGUIEditBox *edit;
 	IGUIButton *button;
+	IGUICheckBox *check;
 	stringw fn;
 	std::string key;
+
+	bool model_texture_single = conf->getBool("model_texture_single");
+	bool wield_texture_single = conf->getBool("wield_texture_single");
+	check = env->addCheckBox(false, rect<s32>(15,20,380,40), tab_model,
+		E_DIALOG_ID_TEXTURES_1_MODEL, L"Use single texture for all layers");
+	check->setChecked(model_texture_single);
+	check = env->addCheckBox(false, rect<s32>(15,20,380,40), tab_wield,
+		E_DIALOG_ID_TEXTURES_1_WIELD, L"Use single texture for all layers");
+	check->setChecked(wield_texture_single);
 
 	ITexture *image = getTexture("browse.png");
 	ISceneNode *model = smgr->getSceneNodeFromId(E_SCENE_ID_MODEL);
 	ISceneNode *wield = smgr->getSceneNodeFromId(E_SCENE_ID_WIELD);
-	u32 mc_model = (model) ? model->getMaterialCount() : 0;
-	u32 mc_wield = (wield) ? wield->getMaterialCount() : 0;
+	u32 mc_model = 0;
+	if (model)
+		mc_model = (model_texture_single) ? 1 : model->getMaterialCount();
+	u32 mc_wield = 0;
+	if (wield)
+		mc_wield = (wield_texture_single) ? 1 : wield->getMaterialCount();
 
 	for (u32 i = 0; i < 6; ++i)
 	{
-		s32 top = i * 30 + 20;
+		s32 top = i * 30 + 50;
 		stringw num = stringw(i + 1);
 
 		key = "model_texture_" + std::to_string(i + 1);
 		fn = conf->getCStr(key);
-		text = env->addStaticText(num.c_str(), rect<s32>(15,top,25,top+20),
+		env->addStaticText(num.c_str(), rect<s32>(15,top,25,top+20),
 			false, false, tab_model, -1);
 		edit = env->addEditBox(fn.c_str(), rect<s32>(35,top,350,top+20),
 			true, tab_model, E_TEXTURE_ID_MODEL + i);
@@ -359,7 +372,7 @@ TexturesDialog::TexturesDialog(IGUIEnvironment *env, IGUIElement *parent,
 
 		key = "wield_texture_" + std::to_string(i + 1);
 		fn = conf->getCStr(key);
-		text = env->addStaticText(num.c_str(), rect<s32>(15,top,25,top+20),
+		env->addStaticText(num.c_str(), rect<s32>(15,top,25,top+20),
 			false, false, tab_wield, -1);
 		edit = env->addEditBox(fn.c_str(), rect<s32>(35,top,350,top+20),
 			true, tab_wield, E_TEXTURE_ID_WIELD + i);
@@ -376,9 +389,9 @@ TexturesDialog::TexturesDialog(IGUIEnvironment *env, IGUIElement *parent,
 		}
 		button->setEnabled(i < mc_wield);
 	}
-	button = env->addButton(rect<s32>(315,255,395,285), this,
+	button = env->addButton(rect<s32>(315,285,395,315), this,
 		E_DIALOG_ID_TEXTURES_OK, L"OK");
-	button = env->addButton(rect<s32>(230,255,310,285), this,
+	button = env->addButton(rect<s32>(230,285,310,315), this,
 		E_DIALOG_ID_TEXTURES_CANCEL, L"Cancel");
 }
 
@@ -408,44 +421,67 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 				}
 			}
 		}
+		else if (event.GUIEvent.EventType == EGET_CHECKBOX_CHANGED)
+		{
+			IGUICheckBox *check = (IGUICheckBox*)getElementFromId(id, true);
+			std::string is_checked = (check->isChecked()) ? "true" : "false";
+
+			ISceneNode *node = 0;
+			s32 edit_box_id;
+			if (id == E_DIALOG_ID_TEXTURES_1_MODEL)
+			{
+				node = smgr->getSceneNodeFromId(E_SCENE_ID_MODEL);
+				edit_box_id = E_TEXTURE_ID_MODEL;
+				conf->set("model_texture_single", is_checked);
+			}
+			else if (id == E_DIALOG_ID_TEXTURES_1_WIELD)
+			{
+				node = smgr->getSceneNodeFromId(E_SCENE_ID_WIELD);
+				edit_box_id = E_TEXTURE_ID_WIELD;
+				conf->set("wield_texture_single", is_checked);
+			}
+			if (node)
+			{
+				for (u32 i = 1; i < 6; ++i)
+				{
+					if (i < node->getMaterialCount())
+					{
+						IGUIEditBox *edit = (IGUIEditBox*)
+							getElementFromId(edit_box_id + i, true);
+						edit->setEnabled(is_checked == "false");
+					}
+				}
+			}
+		}
 		else if (event.GUIEvent.EventType == EGET_BUTTON_CLICKED)
 		{
 			if (id == E_DIALOG_ID_TEXTURES_OK)
 			{
-				ISceneNode *model = smgr->getSceneNodeFromId(E_SCENE_ID_MODEL);
-				ISceneNode *wield = smgr->getSceneNodeFromId(E_SCENE_ID_WIELD);
 				IGUIEditBox *edit;
-
+				ITexture *texture = 0;
+				stringc fn;
 				for (u32 i = 0; i < 6; ++i)
 				{
 					std::string idx = std::to_string(i + 1);
 					edit = (IGUIEditBox*)
 						getElementFromId(E_TEXTURE_ID_MODEL + i, true);
-					if (edit && model && i < model->getMaterialCount())
+
+					fn = stringc(edit->getText()).c_str();
+					texture = getTexture(fn);
+					if (texture)
 					{
-						stringc fn = stringc(edit->getText()).c_str();
-						ITexture *texture = getTexture(fn);
-						if (texture)
-						{
-							std::string key = "model_texture_" + idx;
-							conf->set(key, fn.c_str());
-							SMaterial &material = model->getMaterial(i);
-							material.TextureLayer[0].Texture = texture;
-						}
+						std::string key = "model_texture_" + idx;
+						conf->set(key, fn.c_str());
 					}
 					edit = (IGUIEditBox*)
 						getElementFromId(E_TEXTURE_ID_WIELD + i, true);
-					if (edit && wield && i < wield->getMaterialCount())
+
+					fn = stringc(edit->getText()).c_str();
+					texture = getTexture(fn);
+					if (texture)
 					{
-						stringc fn = stringc(edit->getText()).c_str();
-						ITexture *texture = getTexture(fn);
-						if (texture)
-						{
-							std::string key = "wield_texture_" + idx;
-							conf->set(key, fn.c_str());
-							SMaterial &material = wield->getMaterial(i);
-							material.TextureLayer[0].Texture = texture;
-						}
+						std::string key = "wield_texture_" + idx;
+						conf->set(key, fn.c_str());
 					}
 				}
 			}
