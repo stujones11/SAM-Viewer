@@ -11,7 +11,7 @@
 #else
 #define D_ABOUT_LINK_URL "https://github.com/stujones11/SAM-Viewer"
 #define D_ABOUT_LINK_TEXT "github.com/stujones11/SAM-Viewer"
-#define D_VERSION "0.0.0"
+#define D_VERSION "0.0"
 #endif
 
 static inline void open_url(std::string url)
@@ -170,7 +170,6 @@ AboutDialog::AboutDialog(IGUIEnvironment *env, IGUIElement *parent,
 	env->addButton(rect<s32>(110,235,190,265), this,
 		E_DIALOG_ID_ABOUT_OK, L"OK");
 }
-
 
 SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 	s32 id, const rect<s32> &rectangle, Config *conf) :
