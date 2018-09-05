@@ -72,8 +72,8 @@ ColorCtrl::ColorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle)
 {
 	IVideoDriver *driver = env->getVideoDriver();
-	IGUIStaticText *text = env->addStaticText(label, rect<s32>(0,0,160,20),
-		false, false, this);
+	env->addStaticText(label, rect<s32>(0,0,160,20), false, false, this);
+
 	IGUIEditBox *edit = env->addEditBox(L"", rect<s32>(180,0,250,20), true,
 		this, E_DIALOG_ID_COLOR_EDIT);
 	edit->setMax(6);
@@ -167,7 +167,7 @@ AboutDialog::AboutDialog(IGUIEnvironment *env, IGUIElement *parent,
 		rect<s32>(32,200,268,216), D_ABOUT_LINK_TEXT, D_ABOUT_LINK_URL);
 	link->drop();
 
-	IGUIButton *button = env->addButton(rect<s32>(110,235,190,265), this,
+	env->addButton(rect<s32>(110,235,190,265), this,
 		E_DIALOG_ID_ABOUT_OK, L"OK");
 }
 
@@ -182,11 +182,8 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 
 	IGUITab *tab_general = tabs->addTab(L"General");
 	IGUITab *tab_debug = tabs->addTab(L"Debug");
-	IGUIStaticText *text;
-	IGUIEditBox *edit;
 	IGUISpinBox *spin;
 	IGUICheckBox *check;
-	IGUIButton *button;
 	ColorCtrl *color;
 
 	color = new ColorCtrl(env, tab_general, E_DIALOG_ID_BG_COLOR,
@@ -199,20 +196,20 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 	color->setColor(conf->get("grid_color"));
 	color->drop();
 
-	text = env->addStaticText(L"Wield Attachment Bone:", rect<s32>(20,80,180,100),
+	env->addStaticText(L"Wield Attachment Bone:", rect<s32>(20,80,180,100),
 		false, false, tab_general, -1);
 	stringw bone_name = conf->getCStr("wield_bone");
-	edit = env->addEditBox(bone_name.c_str(), rect<s32>(200,80,320,100),
+	env->addEditBox(bone_name.c_str(), rect<s32>(200,80,320,100),
 		true, tab_general, E_DIALOG_ID_WIELD_BONE);
 
-	text = env->addStaticText(L"Default Screen Width:",
+	env->addStaticText(L"Default Screen Width:",
 		rect<s32>(20,110,180,130), false, false, tab_general, -1);
 	spin = env->addSpinBox(L"", rect<s32>(200,110,270,130),
 		true, tab_general, E_DIALOG_ID_SCREEN_WIDTH);
 	spin->setValue(conf->getInt("screen_width"));
 	spin->setDecimalPlaces(0);
 
-	text = env->addStaticText(L"Default Screen Height:",
+	env->addStaticText(L"Default Screen Height:",
 		rect<s32>(20,140,180,160), false, false, tab_general, -1);
 	spin = env->addSpinBox(L"", rect<s32>(200,140,270,160),
 		true, tab_general, E_DIALOG_ID_SCREEN_HEIGHT);
@@ -238,9 +235,9 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 		E_DIALOG_ID_DEBUG_BUFFERS, L"Show all mesh buffers");
 	check->setChecked(conf->getInt("debug_flags") & EDS_BBOX_BUFFERS);
 
-	button = env->addButton(rect<s32>(315,255,395,285), this,
+	env->addButton(rect<s32>(315,255,395,285), this,
 		E_DIALOG_ID_SETTINGS_OK, L"OK");
-	button = env->addButton(rect<s32>(230,255,310,285), this,
+	env->addButton(rect<s32>(230,255,310,285), this,
 		E_DIALOG_ID_SETTINGS_CANCEL, L"Cancel");
 }
 

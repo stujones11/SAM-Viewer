@@ -12,8 +12,8 @@ VertexCtrl::VertexCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle),
 	vertex(0)
 {
-	IGUIStaticText *text = env->addStaticText(label,
-		rect<s32>(0,0,20,20), false, false, this);
+	env->addStaticText(label, rect<s32>(0,0,20,20),
+		false, false, this);
 
 	IGUISpinBox *spin = env->addSpinBox(L"", rect<s32>(20,0,120,20),
 		true, this, E_GUI_ID_VERTEX);
@@ -56,8 +56,8 @@ VectorCtrl::VectorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle),
 	vector(vector3df(0,0,0))
 {
-	IGUIStaticText *text = env->addStaticText(label,
-		rect<s32>(10,0,150,20), false, false, this);
+	env->addStaticText(label, rect<s32>(10,0,150,20),
+		false, false, this);
 
 	VertexCtrl *x = new VertexCtrl(env, this, E_GUI_ID_VECTOR_X,
 		rect<s32>(10,30,150,50), step, L"X");
@@ -215,12 +215,11 @@ ToolBox::ToolBox(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	VectorCtrl *rotation = new VectorCtrl(env, this, E_GUI_ID_ROTATION,
 		rect<s32>(10,130,150,250), 15.0, L"Rotation:");
 
-	IGUIStaticText *text;
-	text = env->addStaticText(L"Scale:",
-		rect<s32>(20,260,150,280), false, false, this);
+	env->addStaticText(L"Scale:", rect<s32>(20,260,150,280),
+		false, false, this);
 
-	text = env->addStaticText(L"%",
-		rect<s32>(20,290,40,310), false, false, this);
+	env->addStaticText(L"%", rect<s32>(20,290,40,310),
+		false, false, this);
 
 	IGUISpinBox *scale = env->addSpinBox(L"", rect<s32>(40,290,140,310),
 		true, this, E_GUI_ID_SCALE);
@@ -235,8 +234,8 @@ ToolBox::ToolBox(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	rotation->drop();
 	scale->setValue(node->getScale().Y * 100);
 
-	text = env->addStaticText(L"Transparency:",
-		rect<s32>(20,330,150,350), false, false, this);
+	env->addStaticText(L"Transparency:", rect<s32>(20,330,150,350),
+		false, false, this);
 
 	IGUIComboBox *combo = env->addComboBox(rect<s32>(20,360,140,380),
 		this, E_GUI_ID_MATERIAL);
@@ -416,36 +415,35 @@ void GUI::initToolBar()
 {
 	IVideoDriver *driver = device->getVideoDriver();
 	IGUIEnvironment *env = device->getGUIEnvironment();
-	IGUIStaticText *text;
 	IGUISpinBox *spin;
 
 	IGUIToolBar *toolbar = env->addToolBar(0, E_GUI_ID_TOOLBAR);
-	text = env->addStaticText(L"Animation:",
-		rect<s32>(20,6,120,25), false, false, toolbar);
+	env->addStaticText(L"Animation:", rect<s32>(20,6,120,25),
+		false, false, toolbar);
 
-	text = env->addStaticText(L"Start",
-		rect<s32>(130,6,160,25), false, false, toolbar);
+	env->addStaticText(L"Start", rect<s32>(130,6,160,25),
+		false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(170,5,230,25),
 		true, toolbar, E_GUI_ID_ANIM_START);
 	spin->setDecimalPlaces(0);
 	spin->setRange(0, 10000);
 
-	text = env->addStaticText(L"End",
-		rect<s32>(255,6,280,25), false, false, toolbar);
+	env->addStaticText(L"End", rect<s32>(255,6,280,25),
+		false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(290,5,350,25),
 		true, toolbar, E_GUI_ID_ANIM_END);
 	spin->setDecimalPlaces(0);
 	spin->setRange(0, 10000);
 
-	text = env->addStaticText(L"Speed",
-		rect<s32>(370,6,410,25), false, false, toolbar);
+	env->addStaticText(L"Speed", rect<s32>(370,6,410,25),
+		false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(420,5,480,25),
 		true, toolbar, E_GUI_ID_ANIM_SPEED);
 	spin->setDecimalPlaces(0);
 	spin->setRange(0, 10000);
 
-	text = env->addStaticText(L"Frame",
-		rect<s32>(495,6,535,25), false, false, toolbar);
+	env->addStaticText(L"Frame", rect<s32>(495,6,535,25),
+		false, false, toolbar);
 	spin = env->addSpinBox(L"", rect<s32>(550,5,610,25),
 		true, toolbar, E_GUI_ID_ANIM_FRAME);
 	spin->setDecimalPlaces(0);
