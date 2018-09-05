@@ -20,11 +20,21 @@ configure_file (
 )
 
 if(NOT IRRLICHT_INCLUDE_DIR)
-	set(IRRLICHT_INCLUDE_DIR "/usr/include/irrlicht")
+	find_path(IRRLICHT_INCLUDE_DIR NAMES irrlicht.h
+		PATHS
+		/usr/local/include/irrlicht
+		/usr/include/irrlicht
+		/system/develop/headers/irrlicht #Haiku
+	)
 endif()
 
 if(NOT IRRLICHT_LIBRARY)
-	set(IRRLICHT_LIBRARY "/usr/local/lib/libIrrlicht.so")
+	find_library(IRRLICHT_LIBRARY NAMES libIrrlicht.so libIrrlicht.a Irrlicht
+		PATHS
+		/usr/local/lib
+		/usr/lib
+		/system/develop/lib # Haiku
+	)
 endif()
 
 include_directories(
