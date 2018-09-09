@@ -26,7 +26,10 @@ namespace dialog
 	extern bool has_event;
 	extern SEvent event;
 
-	void showFileOpen(IGUIEnvironment *env,	s32 id, const char *caption,
+	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
+		const char **filters, const int filter_count);
+
+	void fileOpen(IGUIEnvironment *env, s32 id, const char *caption,
 		const char **filters, const int filter_count);
 }
 

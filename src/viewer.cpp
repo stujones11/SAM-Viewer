@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <thread>
 #include <iostream>
 #include <sstream>
 #include <irrlicht.h>
@@ -161,21 +160,15 @@ bool Viewer::OnEvent(const SEvent &event)
 			switch (id)
 			{
 			case E_GUI_ID_LOAD_MODEL_MESH:
-			{
-				std::thread thread(dialog::showFileOpen, env,
-					E_GUI_ID_LOAD_MODEL_MESH, "Open main model file",
-					dialog::model_filters, dialog::model_filter_count);
-				thread.detach();
+				dialog::showFileOpen(env, E_GUI_ID_LOAD_MODEL_MESH,
+					"Open main model file", dialog::model_filters,
+					dialog::model_filter_count);
 				break;
-			}
 			case E_GUI_ID_LOAD_WIELD_MESH:
-			{
-				std::thread thread(dialog::showFileOpen, env,
-					E_GUI_ID_LOAD_WIELD_MESH, "Open wield model file",
-					dialog::model_filters, dialog::model_filter_count);
-				thread.detach();
+				dialog::showFileOpen(env, E_GUI_ID_LOAD_WIELD_MESH,
+					"Open wield model file", dialog::model_filters,
+					dialog::model_filter_count);
 				break;
-			}
 			case E_GUI_ID_ENABLE_WIELD:
 			{
 				ISceneNode *wield = scene->getNode(E_SCENE_ID_WIELD);

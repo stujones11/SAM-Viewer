@@ -25,6 +25,14 @@ namespace dialog
 	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
 		const char **filters, const int filter_count)
 	{
+		std::thread thread(fileOpen, env, id, caption, filters,
+			filter_count);
+		thread.detach();
+	}
+
+	void fileOpen(IGUIEnvironment *env, s32 id, const char *caption,
+		const char **filters, const int filter_count)
+	{
 		IGUIWindow *window = env->addWindow(rect<s32>(0,0,0,0), true);
 		window->setVisible(false);
 		io::IFileSystem *fs = env->getFileSystem();
@@ -554,10 +562,9 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 				}
 				if (texture_id)
 				{
-					std::thread thread(dialog::showFileOpen,
-						Environment, texture_id, "Open Image File",
-						dialog::texture_filters, dialog::texture_filter_count);
-					thread.detach();
+					dialog::showFileOpen(Environment, texture_id,
+						"Open Image File", dialog::texture_filters,
+						dialog::texture_filter_count);
 				}
 			}
 		}
