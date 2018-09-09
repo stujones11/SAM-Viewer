@@ -7,6 +7,29 @@ using namespace scene;
 using namespace gui;
 using namespace video;
 
+namespace dialog
+{
+	static const int model_filter_count = 19;
+	static const char *model_filters[] = {
+		"*.obj", "*.b3d", "*.x", "*.3ds",
+		"*.irr", "*.irrmesh", "*.md2", "*.md3",
+		"*.bsp", "*.mesh", "*.ms3d", "*.my3D",
+		"*.lwo", "*.xml", "*.dae", "*.dmf",
+		"*.oct", "*.csm", "*.stl"
+	};
+	static const int texture_filter_count = 8;
+	static const char *texture_filters[] = {
+		"*.png", "*.jpg", "*.tga", "*.bmp",
+		"*.psd", "*.pcx", "*.ppm", "*.wal"
+	};
+	extern const char *filename;
+	extern bool has_event;
+	extern SEvent event;
+
+	void showFileOpen(IGUIEnvironment *env,	s32 id, const char *caption,
+		const char **filters, const int filter_count);
+}
+
 enum
 {
 	E_DIALOG_ID_ABOUT = 0x1000,
@@ -99,6 +122,7 @@ public:
 	TexturesDialog(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 		const rect<s32> &rectangle, Config *conf, ISceneManager *smgr);
 	virtual ~TexturesDialog() {}
+	virtual void draw();
 	virtual bool OnEvent(const SEvent &event);
 
 private:

@@ -40,11 +40,11 @@ include_directories(
    ${IRRLICHT_INCLUDE_DIR}
    ${PROJECT_SOURCE_DIR}/src
 )
-file(GLOB SRCS src/*.cpp)
+file(GLOB SRCS src/*.cpp src/*.c)
 file(MAKE_DIRECTORY "bin")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -pthread")
 
 add_executable(${PROJECT_NAME} ${SRCS})
 target_link_libraries(${PROJECT_NAME} ${IRRLICHT_LIBRARY})

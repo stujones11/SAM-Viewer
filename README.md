@@ -13,17 +13,40 @@ Features
 * Mesh debug view. (wire-frame, skeleton and normals)
 * Animation playback amd frame controls.
 
-Supported Formats
------------------
+Supported Mesh Formats
+----------------------
 
-Compatible with all mesh formats supported by Irrlicht engine.
-
-* B3D files (.b3d)
-* DirectX (.x)
-* Alias Wavefront Maya (.obj)
+* Irrlicht scenes (.irr)
+* Irrlicht static meshes (.irrmesh)
 * 3D Studio meshes (.3ds)
+* B3D files (.b3d)
+* Alias Wavefront Maya (.obj)
 * Lightwave Objects (.lwo)
 * COLLADA 1.4 (.xml, .dae)
+* Microsoft DirectX (.x) (binary & text)
+* Milkshape (.ms3d)
+* OGRE meshes (.mesh)
+* My3DTools 3 (.my3D)
+* Pulsar LMTools (.lmts)
+* Quake 3 levels (.bsp)
+* Quake 2 models (.md2)
+* Quake 3 models (.md3)
+* DeleD (.dmf)
+* FSRad oct (.oct)
+* Cartography shop 4 (.csm)
+* STL 3D files (.stl)
+
+Supported Texture Formats
+-------------------------
+
+* JPEG File Interchange Format (.jpg)
+* Portable Network Graphics (.png)
+* Truevision Targa (.tga)
+* Windows Bitmap (.bmp)
+* Adobe Photoshop (.psd)
+* Zsoft Paintbrush (.pcx)
+* Portable Pixmaps (.ppm)
+* Quake 2 textures (.wal)
 
 Installation
 ------------
@@ -67,7 +90,6 @@ Controls
 To Do
 -----
 
-* Improve file-browser.
 * Basic lighting.
 * Image capture tools.
 

@@ -55,3 +55,12 @@ The Irrlicht Engine License:
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 
+Tiny File Dialogs
+-----------------
+
+Copyright (c) 2014 - 2015 Guillaume Vareille http://ysengrin.com
+http://tinyfiledialogs.sourceforge.net
+
+tiny file dialogs - tinyfd - version 1.7.0 [January 30, 2015] zlib licence.
+Cross-platform dialogs in C/C++ WINDOWS OSX GNOME KDE SOLARIS CONSOLE
+

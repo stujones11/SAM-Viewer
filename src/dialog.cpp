@@ -1,3 +1,4 @@
+#include <thread>
 #include <stdlib.h>
 #include <iostream>
 #include <irrlicht.h>
@@ -5,6 +6,7 @@
 #include "config.h"
 #include "scene.h"
 #include "dialog.h"
+#include "tinyfiledialogs.h"
 
 #ifdef USE_CMAKE_CONFIG_H
 #include "cmake_config.h"
@@ -13,6 +15,48 @@
 #define D_ABOUT_LINK_TEXT "github.com/stujones11/SAM-Viewer"
 #define D_VERSION "0.0"
 #endif
+
+namespace dialog
+{
+	SEvent event;
+	bool has_event = false;
+	const char *filename = "";
+
+	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
+		const char **filters, const int filter_count)
+	{
+		IGUIWindow *window = env->addWindow(rect<s32>(0,0,0,0), true);
+		window->setVisible(false);
+		io::IFileSystem *fs = env->getFileSystem();
+		io::path path = fs->getWorkingDirectory() + "/";
+		const char *fn = tinyfd_openFileDialog(caption,	path.c_str(),
+			filter_count, filters, 0);
+		try
+		{
+			event.EventType = EET_GUI_EVENT;
+			event.UserEvent.UserData1 = id;
+			if (fn)
+			{
+				filename = fn;
+				io::path cwd = fs->getFileDir(fn);
+				fs->changeWorkingDirectoryTo(cwd);
+				event.GUIEvent.EventType = EGET_FILE_SELECTED;
+			}
+			else
+			{
+				filename = "";
+				event.GUIEvent.EventType = EGET_FILE_CHOOSE_DIALOG_CANCELLED;
+			}
+			window->remove();
+			has_event = true;
+
+		}
+		catch (const std::exception& except)
+		{
+			std::cout << except.what() << std::endl;
+		}
+	}
+}
 
 static inline void open_url(std::string url)
 {
@@ -400,11 +444,20 @@ ITexture *TexturesDialog::getTexture(const io::path &filename)
 	return texture;
 }
 
+void TexturesDialog::draw()
+{
+	if (dialog::has_event)
+	{
+		OnEvent(dialog::event);
+		dialog::has_event = false;
+	}
+	IGUIElement::draw();
+}
+
 bool TexturesDialog::OnEvent(const SEvent &event)
 {
 	if (event.EventType == EET_GUI_EVENT)
 	{
-		s32 id = event.GUIEvent.Caller->getID();
 		if (event.GUIEvent.EventType == EGET_ELEMENT_FOCUS_LOST)
 		{
 			if (event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX)
@@ -419,6 +472,7 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 		}
 		else if (event.GUIEvent.EventType == EGET_CHECKBOX_CHANGED)
 		{
+			s32 id = event.GUIEvent.Caller->getID();
 			IGUICheckBox *check = (IGUICheckBox*)getElementFromId(id, true);
 			std::string is_checked = (check->isChecked()) ? "true" : "false";
 
@@ -451,6 +505,7 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 		}
 		else if (event.GUIEvent.EventType == EGET_BUTTON_CLICKED)
 		{
+			s32 id = event.GUIEvent.Caller->getID();
 			if (id == E_DIALOG_ID_TEXTURES_OK)
 			{
 				IGUIEditBox *edit;
@@ -483,32 +538,35 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 			}
 			else
 			{
+				s32 texture_id = 0;
 				for (s32 i = 0; i < 6; ++i)
 				{
 					if (id == E_BUTTON_ID_MODEL + i)
 					{
-						Environment->addFileOpenDialog(L"Open Image File",
-							 true, this, E_TEXTURE_ID_MODEL + i);
+						texture_id = E_TEXTURE_ID_MODEL;
 						break;
 					}
 					else if (id == E_BUTTON_ID_WIELD + i)
 					{
-						Environment->addFileOpenDialog(L"Open Image File",
-							 true, this, E_TEXTURE_ID_WIELD + i);
+						texture_id = E_TEXTURE_ID_WIELD;
 						break;
 					}
+				}
+				if (texture_id)
+				{
+					std::thread thread(dialog::showFileOpen,
+						Environment, texture_id, "Open Image File",
+						dialog::texture_filters, dialog::texture_filter_count);
+					thread.detach();
 				}
 			}
 		}
 		else if (event.GUIEvent.EventType == EGET_FILE_SELECTED)
 		{
-			IGUIFileOpenDialog *dialog =
-				(IGUIFileOpenDialog*)event.GUIEvent.Caller;
-
-			stringw fn = stringw(dialog->getFileName());
+			stringw fn = dialog::filename;
 			if (!fn.empty())
 			{
-				s32 id = dialog->getID();
+				s32 id = event.UserEvent.UserData1;
 				IGUIEditBox *edit = (IGUIEditBox*)getElementFromId(id, true);
 				if (edit)
 				{

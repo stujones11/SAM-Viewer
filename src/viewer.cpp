@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <thread>
 #include <iostream>
 #include <sstream>
 #include <irrlicht.h>
@@ -80,6 +81,8 @@ bool Viewer::run(IrrlichtDevice *irr_device)
 	while (device->run())
 	{
 		resize();
+		if (dialog::has_event)
+			dialog::has_event = !OnEvent(dialog::event);
 		driver->beginScene(true, true, bg_color);
 		smgr->drawAll();
 		env->drawAll();
@@ -154,16 +157,25 @@ bool Viewer::OnEvent(const SEvent &event)
 			s32 item = menu->getSelectedItem();
 			s32 id = menu->getItemCommandId(item);
 			IGUIEnvironment *env = device->getGUIEnvironment();
+
 			switch (id)
 			{
 			case E_GUI_ID_LOAD_MODEL_MESH:
-				env->addFileOpenDialog(L"Open main model file", true, 0,
-					E_GUI_ID_LOAD_MODEL_MESH);
+			{
+				std::thread thread(dialog::showFileOpen, env,
+					E_GUI_ID_LOAD_MODEL_MESH, "Open main model file",
+					dialog::model_filters, dialog::model_filter_count);
+				thread.detach();
 				break;
+			}
 			case E_GUI_ID_LOAD_WIELD_MESH:
-				env->addFileOpenDialog(L"Open wield model file", true, 0,
-					E_GUI_ID_LOAD_WIELD_MESH);
+			{
+				std::thread thread(dialog::showFileOpen, env,
+					E_GUI_ID_LOAD_WIELD_MESH, "Open wield model file",
+					dialog::model_filters, dialog::model_filter_count);
+				thread.detach();
 				break;
+			}
 			case E_GUI_ID_ENABLE_WIELD:
 			{
 				ISceneNode *wield = scene->getNode(E_SCENE_ID_WIELD);
@@ -289,44 +301,38 @@ bool Viewer::OnEvent(const SEvent &event)
 		}
 		else if (event.GUIEvent.EventType == EGET_FILE_SELECTED)
 		{
-			IGUIFileOpenDialog *dialog =
-				(IGUIFileOpenDialog*)event.GUIEvent.Caller;
-
-			stringc fn = stringc(dialog->getFileName()).c_str();
-			if (!fn.empty())
-			{			
-				s32 id = dialog->getID();
-				switch (id)
-				{
-				case E_GUI_ID_LOAD_MODEL_MESH:
-				{
-					if (scene->loadModelMesh(fn))
-					{
-						ISceneNode *model = scene->getNode(E_SCENE_ID_MODEL);
-						if (model)
-						{
-							animation->load(model);
-							setCaptionFileName(fn);
-							gui->reloadToolBox(E_GUI_ID_TOOLBOX_MODEL);
-							conf->set("model_mesh", fn.c_str());
-						}
-					}
-					break;
-				}
-				case E_GUI_ID_LOAD_WIELD_MESH:
-				{
-					if (scene->loadWieldMesh(fn))
-					{
-						gui->reloadToolBox(E_GUI_ID_TOOLBOX_WIELD);
-						conf->set("wield_mesh", fn.c_str());
-					}
-					break;
-				}
-				default:
-					break;
-				}
-			}
+			stringc fn = dialog::filename;
+			s32 id = event.UserEvent.UserData1;
 			gui->setFocused(false);
+			switch (id)
+			{
+			case E_GUI_ID_LOAD_MODEL_MESH:
+			{
+				if (!fn.empty() && scene->loadModelMesh(fn))
+				{
+					ISceneNode *model = scene->getNode(E_SCENE_ID_MODEL);
+					if (model)
+					{
+						animation->load(model);
+						setCaptionFileName(fn);
+						gui->reloadToolBox(E_GUI_ID_TOOLBOX_MODEL);
+						conf->set("model_mesh", fn.c_str());
+					}
+				}
+				return true;
+			}
+			case E_GUI_ID_LOAD_WIELD_MESH:
+			{
+				if (!fn.empty() && scene->loadWieldMesh(fn))
+				{
+					gui->reloadToolBox(E_GUI_ID_TOOLBOX_WIELD);
+					conf->set("wield_mesh", fn.c_str());
+				}
+				return true;
+			}
+			default:
+				break;
+			}
 		}
 		else if (event.GUIEvent.EventType == EGET_FILE_CHOOSE_DIALOG_CANCELLED)
 		{
