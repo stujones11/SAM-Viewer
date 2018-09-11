@@ -1,7 +1,7 @@
 SAM-Viewer
 ==========
 
-**Skin & Model Viewer - Version 0.2**
+**Skin & Model Viewer - Version 0.3**
 
 A simple 3d mesh viewer built with Irrlicht rendering engine.
 
