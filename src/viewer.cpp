@@ -294,7 +294,7 @@ bool Viewer::OnEvent(const SEvent &event)
 		}
 		else if (event.GUIEvent.EventType == EGET_FILE_SELECTED)
 		{
-			stringc fn = dialog::filename;
+			stringc fn = (dialog::filename) ? dialog::filename : "";
 			s32 id = event.UserEvent.UserData1;
 			gui->setFocused(false);
 			switch (id)

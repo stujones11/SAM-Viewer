@@ -20,7 +20,7 @@ namespace dialog
 {
 	SEvent event;
 	bool has_event = false;
-	const char *filename = "";
+	const char *filename = nullptr;
 
 	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
 		const char **filters, const int filter_count)
@@ -52,14 +52,14 @@ namespace dialog
 			}
 			else
 			{
-				filename = "";
+				filename = nullptr;
 				event.GUIEvent.EventType = EGET_FILE_CHOOSE_DIALOG_CANCELLED;
 			}
 			window->remove();
 			has_event = true;
 
 		}
-		catch (const std::exception& except)
+		catch (const std::exception &except)
 		{
 			std::cout << except.what() << std::endl;
 		}
@@ -570,7 +570,7 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 		}
 		else if (event.GUIEvent.EventType == EGET_FILE_SELECTED)
 		{
-			stringw fn = dialog::filename;
+			stringw fn = (dialog::filename) ? dialog::filename : "";
 			if (!fn.empty())
 			{
 				s32 id = event.UserEvent.UserData1;
