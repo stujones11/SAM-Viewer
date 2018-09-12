@@ -22,16 +22,8 @@ namespace dialog
 	bool has_event = false;
 	const char *filename = nullptr;
 
-	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
-		const char **filters, const int filter_count)
-	{
-		std::thread thread(fileOpen, env, id, caption, filters,
-			filter_count);
-		thread.detach();
-	}
-
-	void fileOpen(IGUIEnvironment *env, s32 id, const char *caption,
-		const char **filters, const int filter_count)
+	static inline void fileOpen(IGUIEnvironment *env, s32 id,
+		const char *caption, const char **filters, const int filter_count)
 	{
 		IGUIWindow *window = env->addWindow(rect<s32>(0,0,0,0), true);
 		window->setVisible(false);
@@ -64,11 +56,19 @@ namespace dialog
 			std::cout << except.what() << std::endl;
 		}
 	}
-}
 
-static inline void open_url(std::string url)
-{
-	system((std::string("xdg-open \"") + url + std::string("\"")).c_str());
+	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
+		const char **filters, const int filter_count)
+	{
+		std::thread thread(fileOpen, env, id, caption, filters,
+			filter_count);
+		thread.detach();
+	}
+
+	void openBrowser(std::string url)
+	{
+		system((std::string("xdg-open \"") + url + std::string("\"")).c_str());
+	}
 }
 
 HyperlinkCtrl::HyperlinkCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
@@ -108,7 +108,7 @@ bool HyperlinkCtrl::OnEvent(const SEvent &event)
 	else if (is_active && event.EventType == EET_MOUSE_INPUT_EVENT &&
 		event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
 	{
-		open_url(url);
+		dialog::openBrowser(url);
 	}
 	return IGUIElement::OnEvent(event);
 }

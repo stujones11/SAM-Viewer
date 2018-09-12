@@ -64,9 +64,6 @@ namespace dialog
 
 	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
 		const char **filters, const int filter_count);
-
-	void fileOpen(IGUIEnvironment *env, s32 id, const char *caption,
-		const char **filters, const int filter_count);
 }
 
 class Config;
