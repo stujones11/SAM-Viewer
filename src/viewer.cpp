@@ -8,6 +8,7 @@
 #include "trackball.h"
 #include "gui.h"
 #include "dialog.h"
+#include "controls.h"
 #include "viewer.h"
 
 #define M_ZOOM_IN(fov) std::max(fov - DEGTORAD * 2, PI * 0.0125f)
@@ -350,7 +351,7 @@ bool Viewer::OnEvent(const SEvent &event)
 			s32 id = event.GUIEvent.Caller->getID();
 			switch (id)
 			{
-			case E_GUI_ID_SKIP_REV:
+			case E_CTRL_ID_SKIP_REV:
 				scene->setAnimation(
 					animation->getField(E_GUI_ID_ANIM_START),
 					animation->getField(E_GUI_ID_ANIM_START),
@@ -358,7 +359,7 @@ bool Viewer::OnEvent(const SEvent &event)
 				animation->setState(E_ANIM_STATE_PAUSED);
 				gui->setFocused(false);
 				break;
-			case E_GUI_ID_PLAY_REV:
+			case E_CTRL_ID_PLAY_REV:
 				scene->setAnimation(
 					animation->getField(E_GUI_ID_ANIM_START),
 					animation->getField(E_GUI_ID_ANIM_END),
@@ -366,7 +367,7 @@ bool Viewer::OnEvent(const SEvent &event)
 				animation->setState(E_ANIM_STATE_PLAY_REV);
 				gui->setFocused(false);
 				break;
-			case E_GUI_ID_PAUSE:
+			case E_CTRL_ID_PAUSE:
 				scene->setAnimation(
 					animation->getFrame(),
 					animation->getFrame(),
@@ -374,7 +375,7 @@ bool Viewer::OnEvent(const SEvent &event)
 				animation->setState(E_ANIM_STATE_PAUSED);
 				gui->setFocused(false);
 				break;
-			case E_GUI_ID_PLAY_FWD:
+			case E_CTRL_ID_PLAY_FWD:
 				scene->setAnimation(
 					animation->getField(E_GUI_ID_ANIM_START),
 					animation->getField(E_GUI_ID_ANIM_END),
@@ -382,7 +383,7 @@ bool Viewer::OnEvent(const SEvent &event)
 				animation->setState(E_ANIM_STATE_PLAY_FWD);
 				gui->setFocused(false);
 				break;
-			case E_GUI_ID_SKIP_FWD:
+			case E_CTRL_ID_SKIP_FWD:
 				scene->setAnimation(
 					animation->getField(E_GUI_ID_ANIM_END),
 					animation->getField(E_GUI_ID_ANIM_END),
@@ -587,7 +588,7 @@ void AnimState::load(ISceneNode *node)
 	if (enabled)
 	{
 		IGUIButton *button =
-			(IGUIButton*)anim->getElementFromId(E_GUI_ID_PAUSE, true);
+			(IGUIButton*)anim->getElementFromId(E_CTRL_ID_PAUSE, true);
 		button->setPressed(true);
 	}
 }

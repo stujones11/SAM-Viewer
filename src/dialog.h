@@ -13,8 +13,6 @@ enum
 	E_DIALOG_ID_SETTINGS,
 	E_DIALOG_ID_BG_COLOR,
 	E_DIALOG_ID_GRID_COLOR,
-	E_DIALOG_ID_COLOR_EDIT,
-	E_DIALOG_ID_COLOR_PREVIEW,
 	E_DIALOG_ID_WIELD_BONE,
 	E_DIALOG_ID_SCREEN_WIDTH,
 	E_DIALOG_ID_SCREEN_HEIGHT,
@@ -67,31 +65,6 @@ namespace dialog
 }
 
 class Config;
-
-class HyperlinkCtrl : public IGUIElement
-{
-public:
-	HyperlinkCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-		const rect<s32> &rectangle, std::string title, std::string url);
-	virtual ~HyperlinkCtrl() {}
-	virtual void draw();
-	virtual bool OnEvent(const SEvent &event);
-
-private:
-	std::string url;
-	bool is_active;
-};
-
-class ColorCtrl : public IGUIElement
-{
-public:
-	ColorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-		const rect<s32> &rectangle, const wchar_t *label);
-	virtual ~ColorCtrl() {}
-	virtual bool OnEvent(const SEvent &event);
-	void setColor(const std::string &hex);
-	std::string getColor() const;
-};
 
 class AboutDialog : public IGUIElement
 {

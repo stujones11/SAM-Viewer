@@ -29,10 +29,6 @@ enum
 	E_GUI_ID_TRILINEAR,
 	E_GUI_ID_ANISOTROPIC,
 	E_GUI_ID_DEBUG_INFO,
-	E_GUI_ID_VERTEX,
-	E_GUI_ID_VECTOR_X,
-	E_GUI_ID_VECTOR_Y,
-	E_GUI_ID_VECTOR_Z,
 	E_GUI_ID_POSITION,
 	E_GUI_ID_ROTATION,
 	E_GUI_ID_SCALE,
@@ -42,55 +38,9 @@ enum
 	E_GUI_ID_ANIM_END,
 	E_GUI_ID_ANIM_FRAME,
 	E_GUI_ID_ANIM_SPEED,
-	E_GUI_ID_SKIP_REV,
-	E_GUI_ID_PLAY_REV,
-	E_GUI_ID_PAUSE,
-	E_GUI_ID_PLAY_FWD,
-	E_GUI_ID_SKIP_FWD
 };
 
 class Config;
-
-class VertexCtrl : public IGUIElement
-{
-public:
-	VertexCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-		const rect<s32> &rectangle, f32 step, const wchar_t *label);
-	virtual ~VertexCtrl() {}
-	virtual bool OnEvent(const SEvent &event);
-	f32 getValue() const { return vertex; }
-	void setValue(const f32 &value);
-
-private:
-	f32 vertex;
-};
-
-class VectorCtrl : public IGUIElement
-{
-public:
-	VectorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-		const rect<s32> &rectangle, f32 step, const wchar_t *label);
-	virtual ~VectorCtrl() {}
-	virtual bool OnEvent(const SEvent &event);
-	vector3df getVector() const { return vector; }
-	void setVector(const vector3df &vec);
-
-private:
-	vector3df vector;
-};
-
-class AnimCtrl : public IGUIElement
-{
-public:
-	AnimCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-		const rect<s32> &rectangle);
-	virtual ~AnimCtrl() {}
-	virtual bool OnEvent(const SEvent &event);
-	void reset(bool enabled);
-
-private:
-	s32 button_id;
-};
 
 class ToolBox : public IGUIElement
 {

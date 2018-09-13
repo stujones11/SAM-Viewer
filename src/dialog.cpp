@@ -5,8 +5,10 @@
 
 #include "config.h"
 #include "scene.h"
-#include "dialog.h"
+#include "controls.h"
 #include "tinyfiledialogs.h"
+#include "dialog.h"
+
 
 #ifdef USE_CMAKE_CONFIG_H
 #include "cmake_config.h"
@@ -64,128 +66,6 @@ namespace dialog
 			filter_count);
 		thread.detach();
 	}
-
-	void openBrowser(std::string url)
-	{
-		system((std::string("xdg-open \"") + url + std::string("\"")).c_str());
-	}
-}
-
-HyperlinkCtrl::HyperlinkCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-	const rect<s32> &rectangle, std::string title, std::string url) :
-	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle),
-	url(url),
-	is_active(false)
-{
-	IGUIStaticText *text = env->addStaticText(stringw(title.c_str()).c_str(),
-		rect<s32>(0,0,rectangle.getWidth(),20), false, false, this);
-	text->setOverrideColor(SColor(255,0,0,255));
-	text->setTextAlignment(EGUIA_CENTER, EGUIA_CENTER);
-}
-
-void HyperlinkCtrl::draw()
-{
-	if (is_active)
-	{
-		IVideoDriver *driver = Environment->getVideoDriver();
-		rect<s32> pos = getAbsolutePosition();
-		vector2di end = pos.LowerRightCorner;
-		vector2di start = end - vector2di(pos.getWidth(), 0);
-		driver->draw2DLine(start, end, SColor(255,0,0,255));
-	}
-	IGUIElement::draw();
-}
-
-bool HyperlinkCtrl::OnEvent(const SEvent &event)
-{
-	if (event.EventType == EET_GUI_EVENT)
-	{
-		if (event.GUIEvent.EventType == EGET_ELEMENT_HOVERED)
-			is_active = true;
-		else if (event.GUIEvent.EventType == EGET_ELEMENT_LEFT)
-			is_active = false;
-	}
-	else if (is_active && event.EventType == EET_MOUSE_INPUT_EVENT &&
-		event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
-	{
-		dialog::openBrowser(url);
-	}
-	return IGUIElement::OnEvent(event);
-}
-
-static inline bool isValidHexString(std::string hex)
-{
-	return (hex.length() == 6 &&
-		hex.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos);
-}
-
-ColorCtrl::ColorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
-	const rect<s32> &rectangle, const wchar_t *label) :
-	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle)
-{
-	IVideoDriver *driver = env->getVideoDriver();
-	env->addStaticText(label, rect<s32>(0,0,160,20), false, false, this);
-
-	IGUIEditBox *edit = env->addEditBox(L"", rect<s32>(180,0,250,20), true,
-		this, E_DIALOG_ID_COLOR_EDIT);
-	edit->setMax(6);
-	edit->setToolTipText(L"Hex color RRGGBB");
-
-	ITexture *texture = driver->findTexture("color_preview");
-	if (!texture)
-	{
-		IImage *image = driver->createImage(ECF_A8R8G8B8, dimension2du(30,20));
-		image->fill(SColor(255,255,255,255));
-		texture = driver->addTexture("color_preview", image);
-		image->drop();
-	}
-	IGUIImage *preview = env->addImage(rect<s32>(270,0,300,20), this,
-		E_DIALOG_ID_COLOR_PREVIEW);
-	preview->setImage(texture);
-}
-
-void ColorCtrl::setColor(const std::string &hex)
-{
-	if (!isValidHexString(hex))
-		return;
-
-	stringw text = hex.c_str();
-	IGUIEditBox *edit = (IGUIEditBox*)
-		getElementFromId(E_DIALOG_ID_COLOR_EDIT);
-	if (edit)
-		edit->setText(text.c_str());
-	IGUIImage *preview = (IGUIImage*)
-		getElementFromId(E_DIALOG_ID_COLOR_PREVIEW);
-	if (preview)
-	{
-		SColor color;
-		color.color = std::stoul(hex, nullptr, 16);
-		color.setAlpha(255);
-		preview->setColor(color);
-	}
-}
-
-std::string ColorCtrl::getColor() const
-{
-	std::string hex = "";
-	IGUIEditBox *edit = (IGUIEditBox*)
-		getElementFromId(E_DIALOG_ID_COLOR_EDIT);
-	if (edit)
-		hex = stringc(edit->getText()).c_str();
-	return hex;
-}
-
-bool ColorCtrl::OnEvent(const SEvent &event)
-{
-	if (event.EventType == EET_GUI_EVENT &&
-		event.GUIEvent.EventType == EGET_EDITBOX_CHANGED &&
-		event.GUIEvent.Caller->getID() == E_DIALOG_ID_COLOR_EDIT)
-	{
-		IGUIEditBox *edit = (IGUIEditBox*)event.GUIEvent.Caller;
-		std::string hex = stringc(edit->getText()).c_str();
-		setColor(hex);
-	}
-	return IGUIElement::OnEvent(event);
 }
 
 AboutDialog::AboutDialog(IGUIEnvironment *env, IGUIElement *parent,
@@ -315,14 +195,14 @@ bool SettingsDialog::OnEvent(const SEvent &event)
 		if (color)
 		{
 			const std::string hex = color->getColor();
-			if (isValidHexString(hex))
+			if (color->isValidHexString(hex))
 				conf->set("bg_color", hex);
 		}
 		color = (ColorCtrl*)getElementFromId(E_DIALOG_ID_GRID_COLOR, true);
 		if (color)
 		{
 			const std::string hex = color->getColor();
-			if (isValidHexString(hex))
+			if (color->isValidHexString(hex))
 				conf->set("grid_color", hex);
 		}
 		edit = (IGUIEditBox*)
