@@ -90,7 +90,6 @@ Controls
 To Do
 -----
 
-* Basic lighting.
 * Image capture tools.
 
 Screenshot

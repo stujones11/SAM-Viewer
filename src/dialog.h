@@ -30,7 +30,12 @@ enum
 	E_DIALOG_ID_TEXTURES_1_MODEL,
 	E_DIALOG_ID_TEXTURES_1_WIELD,
 	E_DIALOG_ID_TEXTURES_OK,
-	E_DIALOG_ID_TEXTURES_CANCEL
+	E_DIALOG_ID_TEXTURES_CANCEL,
+	E_DIALOG_ID_LIGHTS,
+	E_DIALOG_ID_LIGHTS_INIT,
+	E_DIALOG_ID_LIGHTS_PREVIEW,
+	E_DIALOG_ID_LIGHTS_OK,
+	E_DIALOG_ID_LIGHTS_CANCEL
 };
 
 enum
@@ -38,7 +43,14 @@ enum
 	E_TEXTURE_ID_MODEL = 0x2000,
 	E_TEXTURE_ID_WIELD = 0x2010,
 	E_BUTTON_ID_MODEL = 0x2020,
-	E_BUTTON_ID_WIELD = 0x2030
+	E_BUTTON_ID_WIELD = 0x2030,
+	E_DIALOG_ID_LIGHT_TYPE = 0x2040,
+	E_DIALOG_ID_LIGHT_POS = 0x2050,
+	E_DIALOG_ID_LIGHT_ROT = 0x2060,
+	E_DIALOG_ID_LIGHT_DIFFUSE = 0x2070,
+	E_DIALOG_ID_LIGHT_AMBIENT = 0x2080,
+	E_DIALOG_ID_LIGHT_SPECULAR = 0x2090,
+	E_DIALOG_ID_LIGHT_RADIUS = 0x2100
 };
 
 namespace dialog
@@ -100,6 +112,21 @@ public:
 
 private:
 	ITexture *getTexture(const io::path &filename);
+
+	Config *conf;
+	ISceneManager *smgr;
+};
+
+class LightsDialog : public IGUIElement
+{
+public:
+	LightsDialog(IGUIEnvironment *env, IGUIElement *parent, s32 id,
+		const rect<s32> &rectangle, Config *conf, ISceneManager *smgr);
+	virtual ~LightsDialog() {}
+	virtual bool OnEvent(const SEvent &event);
+
+private:
+	void setLights(s32 id);
 
 	Config *conf;
 	ISceneManager *smgr;

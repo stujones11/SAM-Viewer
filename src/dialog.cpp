@@ -9,7 +9,6 @@
 #include "tinyfiledialogs.h"
 #include "dialog.h"
 
-
 #ifdef USE_CMAKE_CONFIG_H
 #include "cmake_config.h"
 #else
@@ -194,14 +193,14 @@ bool SettingsDialog::OnEvent(const SEvent &event)
 		color = (ColorCtrl*)getElementFromId(E_DIALOG_ID_BG_COLOR, true);
 		if (color)
 		{
-			const std::string hex = color->getColor();
+			const std::string hex = color->getString();
 			if (color->isValidHexString(hex))
 				conf->set("bg_color", hex);
 		}
 		color = (ColorCtrl*)getElementFromId(E_DIALOG_ID_GRID_COLOR, true);
 		if (color)
 		{
-			const std::string hex = color->getColor();
+			const std::string hex = color->getString();
 			if (color->isValidHexString(hex))
 				conf->set("grid_color", hex);
 		}
@@ -460,6 +459,141 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 					edit->setText(fn.c_str());
 					edit->enableOverrideColor(!(getTexture(fn)));
 				}
+			}
+		}
+	}
+	return IGUIElement::OnEvent(event);
+}
+
+LightsDialog::LightsDialog(IGUIEnvironment *env, IGUIElement *parent,
+	s32 id, const rect<s32> &rectangle, Config *conf, ISceneManager *smgr) :
+	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle),
+	conf(conf),
+	smgr(smgr)
+{
+	IGUITabControl *tabs = env->addTabControl(rect<s32>(2,2,398,310),
+		this, true, true);
+	for (int i = 0; i < 3; ++i)
+	{
+		stringw label = "Light ";
+		label.append(stringw(i + 1));
+		IGUITab *tab_light = tabs->addTab(label.c_str());
+		IGUISpinBox *spin;
+		ColorCtrl *color;
+		VectorCtrl *position;
+
+		env->addStaticText(L"Type:", rect<s32>(20,20,80,40), false, false,
+			tab_light);
+		IGUIComboBox *combo = env->addComboBox(rect<s32>(80,20,200,40),
+			tab_light, E_DIALOG_ID_LIGHT_TYPE + i);
+		combo->addItem(L"Point", ELT_POINT);
+		combo->addItem(L"Spot", ELT_SPOT);
+		combo->addItem(L"Directional", ELT_DIRECTIONAL);
+		env->addStaticText(L"Radius:", rect<s32>(240,20,300,40), false, false,
+			tab_light, -1);
+		spin = env->addSpinBox(L"", rect<s32>(300,20,370,40),
+			true, tab_light, E_DIALOG_ID_LIGHT_RADIUS + i);
+		spin->setDecimalPlaces(0);
+		color = new ColorCtrl(env, tab_light, E_DIALOG_ID_LIGHT_DIFFUSE + i,
+			rect<s32>(20,50,270,70), L"Diffuse Color:");
+		color->drop();
+		color = new ColorCtrl(env, tab_light, E_DIALOG_ID_LIGHT_AMBIENT + i,
+			rect<s32>(20,80,270,100), L"Ambient Color:");
+		color->drop();
+		color = new ColorCtrl(env, tab_light, E_DIALOG_ID_LIGHT_SPECULAR + i,
+			rect<s32>(20,110,270,130), L"Specular Color:");
+		color->drop();
+		position = new VectorCtrl(env, tab_light, E_DIALOG_ID_LIGHT_POS + i,
+			rect<s32>(10,140,150,250), 1.0, L"Position:");
+		position->drop();
+		position = new VectorCtrl(env, tab_light, E_DIALOG_ID_LIGHT_ROT + i,
+			rect<s32>(240,140,380,250), 1.0, L"Rotation:");
+		position->drop();
+	}
+	env->addButton(rect<s32>(5,315,85,345), this,
+		E_DIALOG_ID_LIGHTS_PREVIEW, L"Preview");
+	env->addButton(rect<s32>(315,315,395,345), this,
+		E_DIALOG_ID_LIGHTS_OK, L"OK");
+	env->addButton(rect<s32>(230,315,310,345), this,
+		E_DIALOG_ID_LIGHTS_CANCEL, L"Cancel");
+
+	setLights(E_DIALOG_ID_LIGHTS_INIT);
+}
+
+void LightsDialog::setLights(s32 id)
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		std::string n = std::to_string(i + 1);
+		IGUIComboBox *combo = (IGUIComboBox*)
+			getElementFromId(E_DIALOG_ID_LIGHT_TYPE + i, true);
+		s32 index = combo->getSelected();
+		E_LIGHT_TYPE light_type = (E_LIGHT_TYPE)combo->getItemData(index);
+		ColorCtrl *diffuse = (ColorCtrl*)
+			getElementFromId(E_DIALOG_ID_LIGHT_DIFFUSE + i, true);
+		ColorCtrl *ambient = (ColorCtrl*)
+			getElementFromId(E_DIALOG_ID_LIGHT_AMBIENT + i, true);
+		ColorCtrl *specular = (ColorCtrl*)
+			getElementFromId(E_DIALOG_ID_LIGHT_SPECULAR + i, true);
+		IGUISpinBox *radius = (IGUISpinBox*)
+			getElementFromId(E_DIALOG_ID_LIGHT_RADIUS + i, true);
+		VectorCtrl *position = (VectorCtrl*)
+			getElementFromId(E_DIALOG_ID_LIGHT_POS + i, true);
+		VectorCtrl *rotation = (VectorCtrl*)
+			getElementFromId(E_DIALOG_ID_LIGHT_ROT + i, true);
+		if (id == E_DIALOG_ID_LIGHTS_OK)
+		{
+			conf->set("light_type_" + n, std::to_string(light_type));
+			conf->set("light_color_diffuse_" + n, diffuse->getString());
+			conf->set("light_color_ambient_" + n, ambient->getString());
+			conf->set("light_color_specular_" + n, specular->getString());
+			conf->set("light_position_" + n, position->getString());
+			conf->set("light_rotation_" + n, rotation->getString());
+			conf->set("light_radius_" + n, std::to_string(radius->getValue()));
+		}
+		else if (id != E_DIALOG_ID_LIGHTS_PREVIEW)
+		{
+			light_type = (E_LIGHT_TYPE)conf->getInt("light_type_" + n);
+			index = combo->getIndexForItemData(light_type);
+			combo->setSelected(index);
+			diffuse->setColor(conf->get("light_color_diffuse_" + n));
+			ambient->setColor(conf->get("light_color_ambient_" + n));
+			specular->setColor(conf->get("light_color_specular_" + n));
+			Vector pos = conf->getVector("light_position_" + n);
+			position->setVector(vector3df(pos.x, pos.y, pos.z));
+			Vector rot = conf->getVector("light_rotation_" + n);
+			rotation->setVector(vector3df(rot.x, rot.y, rot.z));
+			radius->setValue(conf->getInt("light_radius_" + n));
+		}
+		LightSource *light = (LightSource*)
+			smgr->getSceneNodeFromId(E_SCENE_ID_LIGHT + i);
+		if (light)
+		{
+			LightSpec lightspec;
+			lightspec.type = light_type;
+			lightspec.position = position->getVector();
+			lightspec.rotation = rotation->getVector();
+			lightspec.radius = radius->getValue();
+			lightspec.color.diffuse = diffuse->getColor();
+			lightspec.color.ambient = ambient->getColor();
+			lightspec.color.specular = specular->getColor();
+			light->setLight(lightspec);
+		}
+	}
+}
+
+bool LightsDialog::OnEvent(const SEvent &event)
+{
+	if (event.EventType == EET_GUI_EVENT)
+	{
+		if (event.GUIEvent.EventType == EGET_BUTTON_CLICKED)
+		{
+			s32 id = event.GUIEvent.Caller->getID();
+			if (id == E_DIALOG_ID_LIGHTS_OK ||
+				id == E_DIALOG_ID_LIGHTS_CANCEL ||
+				id == E_DIALOG_ID_LIGHTS_PREVIEW)
+			{
+				setLights(id);
 			}
 		}
 	}

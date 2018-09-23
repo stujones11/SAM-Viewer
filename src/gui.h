@@ -15,14 +15,14 @@ enum
 	E_GUI_ID_LOAD_WIELD_MESH,
 	E_GUI_ID_SAVE_CONFIG,
 	E_GUI_ID_QUIT,
-	E_GUI_ID_TEXTURES_DIALOG,
-	E_GUI_ID_SETTINGS_DIALOG,
 	E_GUI_ID_TOOLBOX_MODEL,
 	E_GUI_ID_TOOLBOX_WIELD,
 	E_GUI_ID_SHOW_GRID,
 	E_GUI_ID_SHOW_AXES,
+	E_GUI_ID_SHOW_LIGHTS,
 	E_GUI_ID_ENABLE_WIELD,
 	E_GUI_ID_BACK_FACE_CULL,
+	E_GUI_ID_LIGHTING,
 	E_GUI_ID_ORTHOGONAL,
 	E_GUI_ID_PERSPECTIVE,
 	E_GUI_ID_BILINEAR,
@@ -38,6 +38,11 @@ enum
 	E_GUI_ID_ANIM_END,
 	E_GUI_ID_ANIM_FRAME,
 	E_GUI_ID_ANIM_SPEED,
+};
+
+enum
+{
+	E_GUI_ID_LIGHT = 0x4100
 };
 
 class Config;
@@ -71,6 +76,7 @@ public:
 	void showTexturesDialog();
 	void showSettingsDialog();
 	void showAboutDialog();
+	void showLightsDialog();
 
 private:
 	const rect<s32> getWindowRect(const u32 &width, const u32 &height) const;

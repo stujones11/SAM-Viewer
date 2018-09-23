@@ -175,9 +175,10 @@ void GUI::initMenu()
 	submenu->addItem(L"Quit", E_GUI_ID_QUIT);
 
 	submenu = menu->getSubMenu(1);
-	submenu->addItem(L"Textures", E_GUI_ID_TEXTURES_DIALOG);
+	submenu->addItem(L"Textures", E_DIALOG_ID_TEXTURES);
+	submenu->addItem(L"Lights", E_DIALOG_ID_LIGHTS);
 	submenu->addSeparator();
-	submenu->addItem(L"Preferences", E_GUI_ID_SETTINGS_DIALOG);
+	submenu->addItem(L"Preferences", E_DIALOG_ID_SETTINGS);
 
 	submenu = menu->getSubMenu(2);
 	submenu->addItem(L"Model Toolbox", E_GUI_ID_TOOLBOX_MODEL, true, false,
@@ -189,31 +190,44 @@ void GUI::initMenu()
 		true, true);
 	submenu->addItem(L"Show Axes", E_GUI_ID_SHOW_AXES, true, false,
 		true, true);
+	submenu->addItem(L"Show Lights", E_GUI_ID_SHOW_LIGHTS,
+		conf->getBool("lighting"), false, true, true);
 	submenu->addSeparator();
 	submenu->addItem(L"Projection", -1, true, true);
 	submenu->addItem(L"Filters", -1, true, true);
+	submenu->addItem(L"Lights", -1, conf->getBool("lighting"), true);
 	submenu->addSeparator();
 	submenu->addItem(L"Show Wield Item", E_GUI_ID_ENABLE_WIELD, true, false,
 		conf->getBool("wield_show"), true);
 	submenu->addItem(L"Backface Culling", E_GUI_ID_BACK_FACE_CULL, true, false,
 		conf->getBool("backface_cull"), true);
+	submenu->addItem(L"Lighting", E_GUI_ID_LIGHTING, true, false,
+		conf->getBool("lighting"), true);
 	submenu->addSeparator();
 	submenu->addItem(L"Model Debug Info", E_GUI_ID_DEBUG_INFO, true, false,
 		conf->getBool("debug_info"), true);
 
-	submenu = menu->getSubMenu(2)->getSubMenu(6);
+	submenu = menu->getSubMenu(2)->getSubMenu(7);
 	submenu->addItem(L"Perspective", E_GUI_ID_PERSPECTIVE, true, false,
 		!conf->getBool("ortho"), true);
 	submenu->addItem(L"Orthogonal", E_GUI_ID_ORTHOGONAL, true, false,
 		conf->getBool("ortho"), true);
 
-	submenu = menu->getSubMenu(2)->getSubMenu(7);
+	submenu = menu->getSubMenu(2)->getSubMenu(8);
 	submenu->addItem(L"Bilinear", E_GUI_ID_BILINEAR, true, false,
 		conf->getBool("bilinear"), true);
 	submenu->addItem(L"Trilinear", E_GUI_ID_TRILINEAR, true, false,
 		conf->getBool("trilinear"), true);
 	submenu->addItem(L"Anisotropic", E_GUI_ID_ANISOTROPIC, true, false,
 		conf->getBool("anisotropic"), true);
+
+	submenu = menu->getSubMenu(2)->getSubMenu(9);
+	submenu->addItem(L"Light 1", E_GUI_ID_LIGHT, true, false,
+		conf->getBool("light_enabled_1"), true);
+	submenu->addItem(L"Light 2", E_GUI_ID_LIGHT + 1, true, false,
+		conf->getBool("light_enabled_2"), true);
+	submenu->addItem(L"Light 3", E_GUI_ID_LIGHT + 2, true, false,
+		conf->getBool("light_enabled_3"), true);
 
 	submenu = menu->getSubMenu(3);
 	submenu->addItem(L"About", E_DIALOG_ID_ABOUT);
@@ -360,6 +374,18 @@ void GUI::showAboutDialog()
 
 	AboutDialog *dialog = new AboutDialog(env, window,
 		E_DIALOG_ID_ABOUT, rect<s32>(0,20,300,300));
+	dialog->drop();
+}
+
+void GUI::showLightsDialog()
+{
+	IGUIEnvironment *env = device->getGUIEnvironment();
+	ISceneManager *smgr = device->getSceneManager();
+	IGUIWindow *window = env->addWindow(getWindowRect(400, 370),
+		true, L"Lights");
+
+	LightsDialog *dialog = new LightsDialog(env, window,
+		E_DIALOG_ID_LIGHTS, rect<s32>(0,20,400,370), conf, smgr);
 	dialog->drop();
 }
 

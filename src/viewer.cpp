@@ -184,11 +184,14 @@ bool Viewer::OnEvent(const SEvent &event)
 			case E_GUI_ID_QUIT:
 				device->closeDevice();
 				break;
-			case E_GUI_ID_TEXTURES_DIALOG:
+			case E_DIALOG_ID_TEXTURES:
 				gui->showTexturesDialog();
 				break;
-			case E_GUI_ID_SETTINGS_DIALOG:
+			case E_DIALOG_ID_SETTINGS:
 				gui->showSettingsDialog();
+				break;
+			case E_DIALOG_ID_LIGHTS:
+				gui->showLightsDialog();
 				break;
 			case E_GUI_ID_TOOLBOX_MODEL:
 			{
@@ -212,6 +215,9 @@ bool Viewer::OnEvent(const SEvent &event)
 				break;
 			case E_GUI_ID_SHOW_AXES:
 				scene->setAxesVisible(menu->isItemChecked(item));
+				break;
+			case E_GUI_ID_SHOW_LIGHTS:
+				scene->setLightsVisible(menu->isItemChecked(item));
 				break;
 			case E_GUI_ID_BILINEAR:
 				scene->setFilter(EMF_BILINEAR_FILTER,
@@ -245,6 +251,21 @@ bool Viewer::OnEvent(const SEvent &event)
 				scene->setBackFaceCulling(menu->isItemChecked(item));
 				conf->set("backface_cull",
 					boolToString(menu->isItemChecked(item)));
+				break;
+			case E_GUI_ID_LIGHT:
+			case E_GUI_ID_LIGHT + 1:
+			case E_GUI_ID_LIGHT + 2:
+				scene->setLightEnabled(menu->getSelectedItem(),
+					menu->isItemChecked(item));
+				conf->set("light_enabled_" +
+					std::to_string(menu->getSelectedItem() + 1),
+					boolToString(menu->isItemChecked(item)));
+				break;
+			case E_GUI_ID_LIGHTING:
+				scene->setLighting(menu->isItemChecked(item));
+				conf->set("lighting", boolToString(menu->isItemChecked(item)));
+				menu->setItemEnabled(5, menu->isItemChecked(item));
+				menu->setItemEnabled(9, menu->isItemChecked(item));
 				break;
 			case E_GUI_ID_DEBUG_INFO:
 				scene->setDebugInfo(menu->isItemChecked(item));
@@ -401,6 +422,8 @@ bool Viewer::OnEvent(const SEvent &event)
 				break;
 			case E_DIALOG_ID_SETTINGS_CANCEL:
 			case E_DIALOG_ID_TEXTURES_CANCEL:
+			case E_DIALOG_ID_LIGHTS_CANCEL:
+			case E_DIALOG_ID_LIGHTS_OK:
 			case E_DIALOG_ID_ABOUT_OK:
 				event.GUIEvent.Caller->getParent()->getParent()->remove();
 				gui->setFocused(false);

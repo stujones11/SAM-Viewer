@@ -5,6 +5,87 @@
 #include "config.h"
 #include "scene.h"
 
+LightSource::LightSource(ISceneNode *parent, ISceneManager *smgr, s32 id,
+		LightSpec lightspec, const wchar_t *text, SColor text_color) :
+	ISceneNode(parent, smgr, id),
+	light(0),
+	marker(0),
+	label(0)
+{
+	line_color = text_color;
+	line_color.setAlpha(64);
+	text_color.setAlpha(255);
+	texture_name = "light_";
+	texture_name.append(text);
+
+	material.Lighting = false;
+	material.MaterialType = EMT_TRANSPARENT_ALPHA_CHANNEL;
+	material.BackfaceCulling = false;
+
+	IVideoDriver *driver = SceneManager->getVideoDriver();
+	ITexture *texture = driver->addTexture(dimension2d<u32>(1,1),
+		texture_name.c_str());
+
+	marker = smgr->addSphereSceneNode(0.75f, 12, this);
+	marker->setMaterialFlag(EMF_LIGHTING, false);
+	marker->setMaterialTexture(0, texture);
+
+	IGUIEnvironment *env = smgr->getGUIEnvironment();
+	IGUIFont *font = env->getFont("fontlucida.png");
+	label = smgr->addTextSceneNode(font, text, text_color, this);
+	label->setMaterialFlag(EMF_LIGHTING, false);
+
+	light = smgr->addLightSceneNode(this);
+	setLight(lightspec);
+}
+
+void LightSource::setLight(LightSpec lightspec)
+{
+	setPosition(lightspec.position);
+	setRotation(lightspec.rotation);
+	SLight data;
+	data.DiffuseColor = lightspec.color.diffuse;
+	data.AmbientColor = lightspec.color.ambient;
+	data.SpecularColor = lightspec.color.specular;
+	light->setLightData(data);
+	light->setLightType(lightspec.type);
+	light->setRadius(lightspec.radius);
+
+	IVideoDriver *driver = SceneManager->getVideoDriver();
+	ITexture *texture = driver->getTexture(texture_name.c_str());
+	if (texture)
+	{
+		s32 *p = (s32*)texture->lock();
+		p[0] = lightspec.color.diffuse.color;
+		texture->unlock();
+	}
+}
+
+void LightSource::setMarker(const bool &is_visible)
+{
+	marker->setVisible(is_visible);
+	label->setVisible(is_visible);
+}
+
+void LightSource::OnRegisterSceneNode()
+{
+	if (IsVisible)
+		SceneManager->registerNodeForRendering(this);
+
+	ISceneNode::OnRegisterSceneNode();
+}
+
+void LightSource::render()
+{
+	if (!marker->isVisible())
+		return;
+
+	IVideoDriver *driver = SceneManager->getVideoDriver();
+	driver->setMaterial(material);
+	driver->setTransform(ETS_WORLD, AbsoluteTransformation);
+	driver->draw3DLine(vector3df(0,0,0), vector3df(0,0,100), line_color);
+}
+
 Scene::Scene(ISceneNode *parent, ISceneManager *smgr, s32 id) :
 	ISceneNode(parent, smgr, id),
 	conf(0),
@@ -27,6 +108,8 @@ bool Scene::load(Config *config)
 	loadWieldMesh(conf->getCStr("wield_mesh"));
 	setBackFaceCulling(conf->getBool("backface_cull"));
 	setGridColor(conf->getHex("grid_color"));
+	addLights();
+	setLighting(conf->getBool("lighting"));
 	return true;
 }
 
@@ -59,7 +142,8 @@ bool Scene::loadModelMesh(const io::path &filename)
 	f32 s = (f32)conf->getInt("model_scale") / 100;
 	u32 mat = conf->getInt("model_material");
 
-	model->setMaterialFlag(EMF_LIGHTING, false);
+	model->setMaterialFlag(EMF_LIGHTING, conf->getBool("lighting"));
+	model->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 	model->setPosition(vector3df(pos.x, pos.y, pos.z));
 	model->setRotation(vector3df(rot.x, rot.y, rot.z));
 	model->setScale(vector3df(s,s,s));
@@ -105,7 +189,8 @@ bool Scene::loadWieldMesh(const io::path &filename)
 	f32 s = (f32)conf->getInt("wield_scale") / 100;
 	u32 mat = conf->getInt("wield_material");
 
-	wield->setMaterialFlag(EMF_LIGHTING, false);
+	wield->setMaterialFlag(EMF_LIGHTING, conf->getBool("lighting"));
+	wield->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 	wield->setPosition(vector3df(pos.x, pos.y, pos.z));
 	wield->setRotation(vector3df(rot.x, rot.y, rot.z));
 	wield->setScale(vector3df(s,s,s));
@@ -122,6 +207,61 @@ bool Scene::loadWieldMesh(const io::path &filename)
 	setAttachment();
 	loadTextures(wield, "wield");
 	return true;
+}
+
+void Scene::addLights()
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		std::string n = std::to_string(i + 1);
+		Vector pos = conf->getVector("light_position_" + n);
+		Vector rot =  conf->getVector("light_rotation_" + n);
+		LightSpec lightspec;
+		lightspec.type = (E_LIGHT_TYPE)conf->getInt("light_type_" + n);
+		lightspec.position = vector3df(pos.x, pos.y, pos.z);
+		lightspec.rotation = vector3df(rot.x, rot.y, rot.z);
+		lightspec.color.diffuse = conf->getHex("light_color_diffuse_" + n);
+		lightspec.color.ambient = conf->getHex("light_color_ambient_" + n);
+		lightspec.color.specular = conf->getHex("light_color_specular_" + n);
+		lightspec.radius = conf->getInt("light_radius_" + n);
+		SColor text_color = conf->getHex("grid_color");
+		stringw label = n.c_str();
+		LightSource *light = new LightSource(this, SceneManager,
+			E_SCENE_ID_LIGHT + i, lightspec, label.c_str(), text_color);
+		light->drop();
+	}
+}
+
+void Scene::setLighting(const bool &is_enabled)
+{	ISceneNode *model = getNode(E_SCENE_ID_MODEL);
+	if (model)
+		model->setMaterialFlag(EMF_LIGHTING, is_enabled);
+
+	ISceneNode *wield = getNode(E_SCENE_ID_WIELD);
+	if (wield)
+		wield->setMaterialFlag(EMF_LIGHTING, is_enabled);
+	for (int i = 0; i < 3; ++i)
+	{
+		std::string key = "light_enabled_" + std::to_string(i + 1);
+		setLightEnabled(i, conf->getBool(key) && is_enabled);
+	}
+}
+
+void Scene::setLightsVisible(const bool &is_visible)
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		LightSource *light = (LightSource*)
+			SceneManager->getSceneNodeFromId(E_SCENE_ID_LIGHT + i);
+		light->setMarker(is_visible);
+	}
+}
+
+void Scene::setLightEnabled(s32 index, const bool &is_enabled)
+{
+	LightSource *light = (LightSource*)
+		SceneManager->getSceneNodeFromId(E_SCENE_ID_LIGHT + index);
+	light->setVisible(is_enabled);
 }
 
 void Scene::clearTextures(ISceneNode *node, const std::string &prefix)

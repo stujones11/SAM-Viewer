@@ -9,7 +9,7 @@ using namespace video;
 
 enum
 {
-	E_CTRL_ID_VERTEX,
+	E_CTRL_ID_VERTEX = 0x3000,
 	E_CTRL_ID_VECTOR_X,
 	E_CTRL_ID_VECTOR_Y,
 	E_CTRL_ID_VECTOR_Z,
@@ -45,6 +45,7 @@ public:
 	virtual ~VectorCtrl() {}
 	virtual bool OnEvent(const SEvent &event);
 	vector3df getVector() const { return vector; }
+	std::string getString() const;
 	void setVector(const vector3df &vec);
 
 private:
@@ -87,9 +88,9 @@ public:
 	virtual ~ColorCtrl() {}
 	virtual bool OnEvent(const SEvent &event);
 	void setColor(const std::string &hex);
-	std::string getColor() const;
+	std::string getString() const;
+	SColor getColor() const;
 	bool isValidHexString(std::string hex);
 };
-
 
 #endif // D_CONTROLS_H

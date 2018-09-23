@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <iostream>
+#include <sstream>
 #include <irrlicht.h>
 
 #include "controls.h"
@@ -65,6 +66,14 @@ VectorCtrl::VectorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	VertexCtrl *z = new VertexCtrl(env, this, E_CTRL_ID_VECTOR_Z,
 		rect<s32>(10,90,150,110), step, L"Z");
 	z->drop();
+}
+
+std::string VectorCtrl::getString() const
+{
+	std::ostringstream ss;
+	ss << vector.X << "," << vector.Y << "," << vector.Z;
+	std::string str(ss.str());
+	return str;
 }
 
 void VectorCtrl::setVector(const vector3df &vec)
@@ -250,9 +259,10 @@ ColorCtrl::ColorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle)
 {
 	IVideoDriver *driver = env->getVideoDriver();
+	s32 x = rectangle.getWidth() - 140;
 	env->addStaticText(label, rect<s32>(0,0,160,20), false, false, this);
 
-	IGUIEditBox *edit = env->addEditBox(L"", rect<s32>(180,0,250,20), true,
+	IGUIEditBox *edit = env->addEditBox(L"", rect<s32>(x,0,x+70,20), true,
 		this, E_CTRL_ID_COLOR_EDIT);
 	edit->setMax(6);
 	edit->setToolTipText(L"Hex color RRGGBB");
@@ -265,7 +275,7 @@ ColorCtrl::ColorCtrl(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 		texture = driver->addTexture("color_preview", image);
 		image->drop();
 	}
-	IGUIImage *preview = env->addImage(rect<s32>(270,0,300,20), this,
+	IGUIImage *preview = env->addImage(rect<s32>(x+90,0,x+120,20), this,
 		E_CTRL_ID_COLOR_PREVIEW);
 	preview->setImage(texture);
 }
@@ -291,7 +301,7 @@ void ColorCtrl::setColor(const std::string &hex)
 	}
 }
 
-std::string ColorCtrl::getColor() const
+std::string ColorCtrl::getString() const
 {
 	std::string hex = "";
 	IGUIEditBox *edit = (IGUIEditBox*)
@@ -299,6 +309,13 @@ std::string ColorCtrl::getColor() const
 	if (edit)
 		hex = stringc(edit->getText()).c_str();
 	return hex;
+}
+
+SColor ColorCtrl::getColor() const
+{
+	IGUIImage *image = (IGUIImage*)
+		getElementFromId(E_CTRL_ID_COLOR_PREVIEW);
+	return image->getColor();
 }
 
 bool ColorCtrl::isValidHexString(std::string hex)
