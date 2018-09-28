@@ -19,7 +19,16 @@ enum
 	E_CTRL_ID_PLAY_FWD,
 	E_CTRL_ID_SKIP_FWD,
 	E_CTRL_ID_COLOR_EDIT,
-	E_CTRL_ID_COLOR_PREVIEW
+	E_CTRL_ID_COLOR_PREVIEW,
+	E_CTRL_ID_COLOR_CHOOSER,
+	E_CTRL_ID_COLOR_RED,
+	E_CTRL_ID_COLOR_BLUE,
+	E_CTRL_ID_COLOR_GREEN,
+	E_CTRL_ID_COLOR_HUE,
+	E_CTRL_ID_COLOR_SAT,
+	E_CTRL_ID_COLOR_LUM,
+	E_CTRL_ID_COLOR_OK,
+	E_CTRL_ID_COLOR_CANCEL
 };
 
 
@@ -88,9 +97,33 @@ public:
 	virtual ~ColorCtrl() {}
 	virtual bool OnEvent(const SEvent &event);
 	void setColor(const std::string &hex);
+	void setColor(const SColor &color);
 	std::string getString() const;
 	SColor getColor() const;
 	bool isValidHexString(std::string hex);
+};
+
+class ColorChooser : public IGUIElement
+{
+public:
+	ColorChooser(IGUIEnvironment *env, IGUIElement *parent,
+		ColorCtrl *receiver, s32 id, const rect<s32> &rectangle,
+		SColor color_orig);
+	virtual ~ColorChooser() {}
+	virtual void draw();
+	virtual bool OnEvent(const SEvent &event);
+
+private:
+	void setColor();
+	SColor getPixelColor(const vector2di &pos);
+
+	ColorCtrl *receiver;
+	SColor color_orig;
+	SColor color_selected;
+	SColorHSL color_hsl;
+	rect<s32> rect_color;
+	rect<s32> rect_shade;
+	rect<s32> rect_orig;
 };
 
 #endif // D_CONTROLS_H

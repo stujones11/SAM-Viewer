@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include <irrlicht.h>
 
 #include "controls.h"
@@ -301,6 +302,20 @@ void ColorCtrl::setColor(const std::string &hex)
 	}
 }
 
+void ColorCtrl::setColor(const SColor &color)
+{
+	std::stringstream ss;
+	ss << std::setfill('0') << std::setw(2) << std::hex << color.getRed();
+	ss << std::setfill('0') << std::setw(2) << std::hex << color.getGreen();
+	ss << std::setfill('0') << std::setw(2) << std::hex << color.getBlue();
+	std::string hex = ss.str();
+	for (auto &val : hex)
+	{
+		val = toupper(val);
+	}
+	setColor(hex);
+}
+
 std::string ColorCtrl::getString() const
 {
 	std::string hex = "";
@@ -333,6 +348,211 @@ bool ColorCtrl::OnEvent(const SEvent &event)
 		IGUIEditBox *edit = (IGUIEditBox*)event.GUIEvent.Caller;
 		std::string hex = stringc(edit->getText()).c_str();
 		setColor(hex);
+	}
+	else if (event.EventType == EET_MOUSE_INPUT_EVENT &&
+		event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+	{
+		IGUIElement *elem = getElementFromPoint(
+			vector2di(event.MouseInput.X, event.MouseInput.Y));
+		if (elem && elem->getType() == EGUIET_IMAGE)
+		{
+			vector2di p = elem->getAbsolutePosition().UpperLeftCorner;
+			IGUIWindow *window = Environment->addWindow(
+				rect<s32>(p.X+40, p.Y, p.X+320, p.Y+270), true, L"Color");
+			ColorChooser *dialog = new ColorChooser(Environment, window, this,
+				E_CTRL_ID_COLOR_CHOOSER, rect<s32>(0,20,280,270), getColor());
+			dialog->drop();
+		}
+	}
+	return IGUIElement::OnEvent(event);
+}
+
+ColorChooser::ColorChooser(IGUIEnvironment *env, IGUIElement *parent,
+		ColorCtrl *receiver, s32 id, const rect<s32> &rectangle,
+		SColor color_orig) :
+	IGUIElement(EGUIET_ELEMENT, env, parent, id, rectangle),
+	receiver(receiver),
+	color_orig(color_orig),
+	color_selected(color_orig)
+{
+	IGUISpinBox *spin;
+	env->addStaticText(L"R", rect<s32>(180,20,200,40),
+		false, false, this);
+	spin = env->addSpinBox(L"", rect<s32>(200,20,260,40),
+		true, this, E_CTRL_ID_COLOR_RED);
+	spin->setDecimalPlaces(0);
+	spin->setRange(0, 255);
+	env->addStaticText(L"G", rect<s32>(180,50,200,70),
+		false, false, this);
+	spin = env->addSpinBox(L"", rect<s32>(200,50,260,70),
+		true, this, E_CTRL_ID_COLOR_GREEN);
+	spin->setDecimalPlaces(0);
+	spin->setRange(0, 255);
+	env->addStaticText(L"B", rect<s32>(180,80,200,100),
+		false, false, this);
+	spin = env->addSpinBox(L"", rect<s32>(200,80,260,100),
+		true, this, E_CTRL_ID_COLOR_BLUE);
+	spin->setDecimalPlaces(0);
+	spin->setRange(0, 255);
+	env->addStaticText(L"H", rect<s32>(180,120,200,140),
+		false, false, this);
+	spin = env->addSpinBox(L"", rect<s32>(200,120,260,140),
+		true, this, E_CTRL_ID_COLOR_HUE);
+	spin->setDecimalPlaces(0);
+	spin->setRange(0, 360);
+	env->addStaticText(L"S", rect<s32>(180,150,200,170),
+		false, false, this);
+	spin = env->addSpinBox(L"", rect<s32>(200,150,260,170),
+		true, this, E_CTRL_ID_COLOR_SAT);
+	spin->setDecimalPlaces(0);
+	spin->setRange(0, 100);
+	env->addStaticText(L"L", rect<s32>(180,180,200,200),
+		false, false, this);
+	spin = env->addSpinBox(L"", rect<s32>(200,180,260,200),
+		true, this, E_CTRL_ID_COLOR_LUM);
+	spin->setDecimalPlaces(0);
+	spin->setValue(0);
+	spin->setRange(0, 100);
+
+	env->addButton(rect<s32>(195,215,275,245), this,
+		E_CTRL_ID_COLOR_OK, L"OK");
+	env->addButton(rect<s32>(110,215,190,245), this,
+		E_CTRL_ID_COLOR_CANCEL, L"Cancel");
+
+	color_hsl.fromRGB(color_orig);
+	setColor();
+}
+
+SColor ColorChooser::getPixelColor(const vector2di &pos)
+{
+	IVideoDriver *driver = Environment->getVideoDriver();
+	IImage *capture = driver->createScreenShot(ECF_R8G8B8);
+	SColor color = capture->getPixel(pos.X, pos.Y);
+	capture->drop();
+	return color;
+}
+
+void ColorChooser::setColor()
+{
+	IGUISpinBox *spin;
+	spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_RED);
+	spin->setValue(color_selected.getRed());
+	spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_GREEN);
+	spin->setValue(color_selected.getGreen());
+	spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_BLUE);
+	spin->setValue(color_selected.getBlue());
+
+	spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_HUE);
+	spin->setValue(color_hsl.Hue);
+	spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_SAT);
+	spin->setValue(color_hsl.Saturation);
+	spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_LUM);
+	spin->setValue(color_hsl.Luminance);
+}
+
+void ColorChooser::draw()
+{
+	IVideoDriver *driver = Environment->getVideoDriver();
+	vector2di p = getAbsolutePosition().UpperLeftCorner;
+	rect_color = rect<s32>(p.X+20,p.Y+20,p.X+40,p.Y+200);
+	rect_shade = rect<s32>(p.X+50,p.Y+20,p.X+169,p.Y+199);
+	rect_orig = rect<s32>(p.X+10,p.Y+215,p.X+50,p.Y+240);
+	for (s32 i = 0; i < 180; ++i)
+	{
+		SColorHSL hsl(i * 2, 100.f, 50.f);
+		SColorf color;
+		hsl.toRGB(color);
+		driver->draw2DLine(vector2d<s32>(p.X+20,p.Y+20+i),
+			vector2d<s32>(p.X+40,p.Y+20+i), color.toSColor());
+	}
+	SColorf color;
+	SColorHSL hsl = color_hsl;
+	hsl.Saturation = 100.f;
+	hsl.Luminance = 50.f;
+	hsl.toRGB(color);
+	driver->draw2DRectangle(rect<s32>(p.X+50,p.Y+20,p.X+170,p.Y+200),
+		color.toSColor(), color.toSColor(), SColor(255,0,0,0),
+		SColor(255,255,255,255));
+	driver->draw2DRectangle(color_orig, rect_orig);
+	driver->draw2DRectangle(color_selected,
+		rect<s32>(p.X+60,p.Y+215,p.X+100,p.Y+240));
+	IGUIElement::draw();
+}
+
+bool ColorChooser::OnEvent(const SEvent &event)
+{
+	if (event.EventType == EET_GUI_EVENT)
+	{
+		s32 id = event.GUIEvent.Caller->getID();
+		if (event.GUIEvent.EventType == EGET_SPINBOX_CHANGED)
+		{
+			IGUISpinBox *spin = 0;
+			switch (id)
+			{
+			case E_CTRL_ID_COLOR_RED:
+			case E_CTRL_ID_COLOR_GREEN:
+			case E_CTRL_ID_COLOR_BLUE:
+			{
+				spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_RED);
+				color_selected.setRed((u32)spin->getValue());
+				spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_GREEN);
+				color_selected.setGreen((u32)spin->getValue());
+				spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_BLUE);
+				color_selected.setBlue((u32)spin->getValue());
+				color_hsl.fromRGB(color_selected);
+				break;
+			}
+			case E_CTRL_ID_COLOR_HUE:
+			case E_CTRL_ID_COLOR_SAT:
+			case E_CTRL_ID_COLOR_LUM:
+			{
+				spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_HUE);
+				color_hsl.Hue = spin->getValue();
+				spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_SAT);
+				color_hsl.Saturation = spin->getValue();
+				spin = (IGUISpinBox*)getElementFromId(E_CTRL_ID_COLOR_LUM);
+				color_hsl.Luminance = spin->getValue();
+				SColorf color;
+				color_hsl.toRGB(color);
+				color_selected = color.toSColor();
+				break;
+			}
+			default:
+				break;
+			}
+			setColor();
+		}
+		else if (event.GUIEvent.EventType == EGET_BUTTON_CLICKED)
+		{
+			if (id = E_CTRL_ID_COLOR_OK)
+				 receiver->setColor(color_selected);
+			getParent()->remove();
+		}
+	}
+	else if (event.EventType == EET_MOUSE_INPUT_EVENT &&
+		event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+	{
+		vector2di pos = vector2di(event.MouseInput.X, event.MouseInput.Y);
+		if (rect_color.isPointInside(pos) || rect_orig.isPointInside(pos))
+		{
+			color_selected = getPixelColor(pos);
+			color_hsl.fromRGB(color_selected);
+			setColor();
+		}
+		else if (rect_shade.isPointInside(pos))
+		{
+			// ignore hue component of shade gradient
+			SColorf color;
+			SColor rgb = getPixelColor(pos);
+			SColorHSL hsl;
+			hsl.fromRGB(rgb);
+			color_hsl.Saturation = hsl.Saturation;
+			color_hsl.Luminance = hsl.Luminance;
+			color_hsl.toRGB(color);
+			color_selected = color.toSColor();
+			setColor();
+		}
+		return true;
 	}
 	return IGUIElement::OnEvent(event);
 }
