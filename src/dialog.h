@@ -68,11 +68,8 @@ namespace dialog
 		"*.png", "*.jpg", "*.tga", "*.bmp",
 		"*.psd", "*.pcx", "*.ppm", "*.wal"
 	};
-	extern const char *filename;
-	extern bool has_event;
-	extern SEvent event;
 
-	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
+	const char *fileOpenDialog(IGUIEnvironment *env, const char *caption,
 		const char **filters, const int filter_count);
 }
 
@@ -107,7 +104,6 @@ public:
 	TexturesDialog(IGUIEnvironment *env, IGUIElement *parent, s32 id,
 		const rect<s32> &rectangle, Config *conf, ISceneManager *smgr);
 	virtual ~TexturesDialog() {}
-	virtual void draw();
 	virtual bool OnEvent(const SEvent &event);
 
 private:

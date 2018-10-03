@@ -1,4 +1,3 @@
-#include <thread>
 #include <stdlib.h>
 #include <iostream>
 #include <irrlicht.h>
@@ -19,51 +18,19 @@
 
 namespace dialog
 {
-	SEvent event;
-	bool has_event = false;
-	const char *filename = nullptr;
-
-	static inline void fileOpen(IGUIEnvironment *env, s32 id,
-		const char *caption, const char **filters, const int filter_count)
-	{
-		IGUIWindow *window = env->addWindow(rect<s32>(0,0,0,0), true);
-		window->setVisible(false);
-		io::IFileSystem *fs = env->getFileSystem();
-		io::path path = fs->getWorkingDirectory() + "/";
-		const char *fn = tinyfd_openFileDialog(caption,	path.c_str(),
-			filter_count, filters, 0);
-		try
-		{
-			event.EventType = EET_GUI_EVENT;
-			event.UserEvent.UserData1 = id;
-			if (fn)
-			{
-				filename = fn;
-				io::path cwd = fs->getFileDir(fn);
-				fs->changeWorkingDirectoryTo(cwd);
-				event.GUIEvent.EventType = EGET_FILE_SELECTED;
-			}
-			else
-			{
-				filename = nullptr;
-				event.GUIEvent.EventType = EGET_FILE_CHOOSE_DIALOG_CANCELLED;
-			}
-			window->remove();
-			has_event = true;
-
-		}
-		catch (const std::exception &except)
-		{
-			std::cout << except.what() << std::endl;
-		}
-	}
-
-	void showFileOpen(IGUIEnvironment *env, s32 id, const char *caption,
+	const char *fileOpenDialog(IGUIEnvironment *env, const char *caption,
 		const char **filters, const int filter_count)
 	{
-		std::thread thread(fileOpen, env, id, caption, filters,
-			filter_count);
-		thread.detach();
+		io::IFileSystem *fs = env->getFileSystem();
+		io::path path = fs->getWorkingDirectory() + "/";
+		const char *fn = tinyfd_openFileDialog(caption, path.c_str(),
+			filter_count, filters, 0);
+		if (fn)
+		{
+			io::path cwd = fs->getFileDir(fn);
+			fs->changeWorkingDirectoryTo(cwd);
+		}
+		return fn;
 	}
 }
 
@@ -331,16 +298,6 @@ ITexture *TexturesDialog::getTexture(const io::path &filename)
 	return texture;
 }
 
-void TexturesDialog::draw()
-{
-	if (dialog::has_event)
-	{
-		OnEvent(dialog::event);
-		dialog::has_event = false;
-	}
-	IGUIElement::draw();
-}
-
 bool TexturesDialog::OnEvent(const SEvent &event)
 {
 	if (event.EventType == EET_GUI_EVENT)
@@ -425,39 +382,32 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 			}
 			else
 			{
-				s32 texture_id = 0;
+				IGUIEditBox *edit = 0;
+				s32 edit_id = 0;
 				for (s32 i = 0; i < 6; ++i)
 				{
 					if (id == E_BUTTON_ID_MODEL + i)
+						edit_id = E_TEXTURE_ID_MODEL + i;
+
+					else if (id == E_BUTTON_ID_MODEL + i)
+						edit_id = E_TEXTURE_ID_MODEL + 1;
+
+					if (edit_id)
 					{
-						texture_id = E_TEXTURE_ID_MODEL;
-						break;
-					}
-					else if (id == E_BUTTON_ID_WIELD + i)
-					{
-						texture_id = E_TEXTURE_ID_WIELD;
+						edit = (IGUIEditBox*)getElementFromId(edit_id, true);
 						break;
 					}
 				}
-				if (texture_id)
-				{
-					dialog::showFileOpen(Environment, texture_id,
-						"Open Image File", dialog::texture_filters,
-						dialog::texture_filter_count);
-				}
-			}
-		}
-		else if (event.GUIEvent.EventType == EGET_FILE_SELECTED)
-		{
-			stringw fn = (dialog::filename) ? dialog::filename : "";
-			if (!fn.empty())
-			{
-				s32 id = event.UserEvent.UserData1;
-				IGUIEditBox *edit = (IGUIEditBox*)getElementFromId(id, true);
 				if (edit)
 				{
-					edit->setText(fn.c_str());
-					edit->enableOverrideColor(!(getTexture(fn)));
+					const char *fn = dialog::fileOpenDialog(Environment,
+						"Open Image File", dialog::texture_filters,
+						dialog::texture_filter_count);
+					if (fn)
+					{
+						edit->setText(stringw(fn).c_str());
+						edit->enableOverrideColor(!(getTexture(fn)));
+					}
 				}
 			}
 		}
