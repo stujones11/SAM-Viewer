@@ -1,7 +1,7 @@
 SAM-Viewer
 ==========
 
-**Skin & Model Viewer - Version 0.3**
+**Skin & Model Viewer - Version 0.4**
 
 A simple 3d mesh viewer built with Irrlicht rendering engine.
 
@@ -12,6 +12,7 @@ Features
 * Multiple textures, up to 6 material layers.
 * Mesh debug view. (wire-frame, skeleton and normals)
 * Animation playback amd frame controls.
+* Simple lighting.
 
 Supported Mesh Formats
 ----------------------
