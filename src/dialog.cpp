@@ -13,23 +13,36 @@
 #else
 #define D_ABOUT_LINK_URL "https://github.com/stujones11/SAM-Viewer"
 #define D_ABOUT_LINK_TEXT "github.com/stujones11/SAM-Viewer"
-#define D_VERSION "0.0"
+#define D_VERSION "dirty"
 #endif
 
 namespace dialog
 {
-	const char *fileOpenDialog(IGUIEnvironment *env, const char *caption,
+	static inline void setWorkingDir(io::IFileSystem *fs, const char *fn)
+	{
+		if (!fn || stringc(fn).empty())
+			return;
+		io::path cwd = fs->getFileDir(fn);
+		fs->changeWorkingDirectoryTo(cwd);
+	}
+
+	const char *fileOpenDialog(io::IFileSystem *fs, const char *caption,
 		const char **filters, const int filter_count)
 	{
-		io::IFileSystem *fs = env->getFileSystem();
 		io::path path = fs->getWorkingDirectory() + "/";
 		const char *fn = tinyfd_openFileDialog(caption, path.c_str(),
 			filter_count, filters, 0);
-		if (fn)
-		{
-			io::path cwd = fs->getFileDir(fn);
-			fs->changeWorkingDirectoryTo(cwd);
-		}
+		setWorkingDir(fs, fn);
+		return fn;
+	}
+
+	const char *fileSaveDialog(io::IFileSystem *fs, const char *caption,
+		const char **filters, const int filter_count)
+	{
+		io::path path = fs->getWorkingDirectory() + "/";
+		const char *fn = tinyfd_saveFileDialog(caption, path.c_str(),
+			filter_count, filters);
+		setWorkingDir(fs, fn);
 		return fn;
 	}
 }
@@ -400,9 +413,9 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 				}
 				if (edit)
 				{
-					const char *fn = dialog::fileOpenDialog(Environment,
-						"Open Image File", dialog::texture_filters,
-						dialog::texture_filter_count);
+					const char *fn = dialog::fileOpenDialog(
+						Environment->getFileSystem(), "Open Image File",
+						dialog::texture_filters, dialog::texture_filter_count);
 					if (fn)
 					{
 						edit->setText(stringw(fn).c_str());

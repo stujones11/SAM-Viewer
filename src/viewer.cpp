@@ -132,6 +132,26 @@ void Viewer::setCaptionFileName(const io::path &filename)
 	device->setWindowCaption(caption.c_str());
 }
 
+void Viewer::exportStaticMesh(const char *caption, const char **filters,
+	const int filter_count, EMESH_WRITER_TYPE id)
+{
+	io::IFileSystem *fs = device->getFileSystem();
+	const char *fn = dialog::fileSaveDialog(fs, caption, filters,
+		filter_count);
+	if (!fn || stringc(fn).empty())
+		return;
+
+	IAnimatedMeshSceneNode *model =
+		(IAnimatedMeshSceneNode*)scene->getNode(E_SCENE_ID_MODEL);
+	IAnimatedMesh *mesh = model->getMesh();
+	io::IWriteFile *file = fs->createAndWriteFile(fn);
+	ISceneManager *smgr = device->getSceneManager();
+	IMeshWriter *writer = smgr->createMeshWriter(id);
+	writer->writeMesh(file, mesh);
+	writer->drop();
+	file->drop();
+}
+
 static inline std::string boolToString(bool b)
 {
 	return (b) ? "true" : "false";
@@ -154,16 +174,16 @@ bool Viewer::OnEvent(const SEvent &event)
 			IGUIContextMenu *menu = (IGUIContextMenu*)event.GUIEvent.Caller;
 			s32 item = menu->getSelectedItem();
 			s32 id = menu->getItemCommandId(item);
-			IGUIEnvironment *env = device->getGUIEnvironment();
+			io::IFileSystem *fs = device->getFileSystem();
 
 			switch (id)
 			{
 			case E_GUI_ID_LOAD_MODEL_MESH:
 			{
-				const char *fn = dialog::fileOpenDialog(env,
+				const char *fn = dialog::fileOpenDialog(fs,
 					"Open main model file", dialog::model_filters,
 					dialog::model_filter_count);
-				if (fn && scene->loadModelMesh(fn))
+				if (fn && !stringc(fn).empty() && scene->loadModelMesh(fn))
 				{
 					ISceneNode *model = scene->getNode(E_SCENE_ID_MODEL);
 					if (model)
@@ -178,14 +198,49 @@ bool Viewer::OnEvent(const SEvent &event)
 			}
 			case E_GUI_ID_LOAD_WIELD_MESH:
 			{
-				const char *fn = dialog::fileOpenDialog(env,
+				const char *fn = dialog::fileOpenDialog(fs,
 					"Open wield model file", dialog::model_filters,
 					dialog::model_filter_count);
-				if (fn && scene->loadWieldMesh(fn))
+				if (fn && !stringc(fn).empty() && scene->loadWieldMesh(fn))
 				{
 					gui->reloadToolBox(E_GUI_ID_TOOLBOX_WIELD);
 					conf->set("wield_mesh", fn);
 				}
+				break;
+			}
+			case E_GUI_ID_EXPORT_MESH_IRR:
+			{
+				const char *filters[] = {"*.irrmesh"};
+				exportStaticMesh("Export Irrlicht Mesh",
+					filters, 1, EMWT_IRR_MESH);
+				break;
+			}
+			case E_GUI_ID_EXPORT_MESH_COL:
+			{
+				const char *filters[] = {"*.dae", "*.xml"};
+				exportStaticMesh("Export Collada Mesh",
+					filters, 2, EMWT_COLLADA);
+				break;
+			}
+			case E_GUI_ID_EXPORT_MESH_STL:
+			{
+				const char *filters[] = {"*.stl"};
+				exportStaticMesh("Export STL Mesh",
+					filters, 1, EMWT_STL);
+				break;
+			}
+			case E_GUI_ID_EXPORT_MESH_OBJ:
+			{
+				const char *filters[] = {"*.obj"};
+				exportStaticMesh("Export Wavefront Mesh",
+					filters, 1, EMWT_OBJ);
+				break;
+			}
+			case E_GUI_ID_EXPORT_MESH_PLY:
+			{
+				const char *filters[] = {"*.ply"};
+				exportStaticMesh("Export Polygon File",
+					filters, 1, EMWT_PLY);
 				break;
 			}
 			case E_GUI_ID_ENABLE_WIELD:

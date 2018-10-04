@@ -57,6 +57,8 @@ private:
 	void setProjection();
 	void setBackgroundColor(const u32 &color);
 	void setCaptionFileName(const io::path &filename);
+	void exportStaticMesh(const char *caption, const char **filters,
+		const int filter_count, EMESH_WRITER_TYPE id);
 
 	Config *conf;
 	IrrlichtDevice *device;

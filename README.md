@@ -13,6 +13,7 @@ Features
 * Mesh debug view. (wire-frame, skeleton and normals)
 * Animation playback amd frame controls.
 * Simple lighting.
+* Static mesh export.
 
 Supported Mesh Formats
 ----------------------

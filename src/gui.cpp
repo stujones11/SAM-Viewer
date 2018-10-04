@@ -169,10 +169,23 @@ void GUI::initMenu()
 	submenu = menu->getSubMenu(0);
 	submenu->addItem(L"Load Model Mesh", E_GUI_ID_LOAD_MODEL_MESH);
 	submenu->addItem(L"Load Wield Mesh", E_GUI_ID_LOAD_WIELD_MESH);
-	submenu->addSeparator();
 	submenu->addItem(L"Save Configuration", E_GUI_ID_SAVE_CONFIG);
 	submenu->addSeparator();
+	submenu->addItem(L"Export Static Mesh", -1, true, true);
+	submenu->addSeparator();
 	submenu->addItem(L"Quit", E_GUI_ID_QUIT);
+
+	submenu = menu->getSubMenu(0)->getSubMenu(4);
+	submenu->addItem(L"Irrlcht (.irrmesh)",
+		E_GUI_ID_EXPORT_MESH_IRR);
+	submenu->addItem(L"Collada (.dae, .xml)",
+		E_GUI_ID_EXPORT_MESH_COL);
+	submenu->addItem(L"STL (.stl)",
+		E_GUI_ID_EXPORT_MESH_STL);
+	submenu->addItem(L"Wavefront (.obj)",
+		E_GUI_ID_EXPORT_MESH_OBJ);
+	submenu->addItem(L"Polygon file format (.ply)",
+		E_GUI_ID_EXPORT_MESH_PLY);
 
 	submenu = menu->getSubMenu(1);
 	submenu->addItem(L"Textures", E_DIALOG_ID_TEXTURES);

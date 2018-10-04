@@ -69,7 +69,10 @@ namespace dialog
 		"*.psd", "*.pcx", "*.ppm", "*.wal"
 	};
 
-	const char *fileOpenDialog(IGUIEnvironment *env, const char *caption,
+	const char *fileOpenDialog(io::IFileSystem *fs, const char *caption,
+		const char **filters, const int filter_count);
+
+	const char *fileSaveDialog(io::IFileSystem *fs, const char *caption,
 		const char **filters, const int filter_count);
 }
 
