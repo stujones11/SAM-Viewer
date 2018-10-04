@@ -402,8 +402,8 @@ bool TexturesDialog::OnEvent(const SEvent &event)
 					if (id == E_BUTTON_ID_MODEL + i)
 						edit_id = E_TEXTURE_ID_MODEL + i;
 
-					else if (id == E_BUTTON_ID_MODEL + i)
-						edit_id = E_TEXTURE_ID_MODEL + 1;
+					else if (id == E_BUTTON_ID_WIELD + i)
+						edit_id = E_TEXTURE_ID_WIELD + i;
 
 					if (edit_id)
 					{
