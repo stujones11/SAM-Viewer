@@ -141,12 +141,47 @@ void Viewer::exportStaticMesh(const char *caption, const char **filters,
 	if (!fn || stringc(fn).empty())
 		return;
 
+	u32 flags = conf->getInt("export_flags");
+	u32 scale = conf->getInt("export_scale");
+	IAnimatedMeshSceneNode *clone = 0;
 	IAnimatedMeshSceneNode *model =
 		(IAnimatedMeshSceneNode*)scene->getNode(E_SCENE_ID_MODEL);
-	IAnimatedMesh *mesh = model->getMesh();
-	io::IWriteFile *file = fs->createAndWriteFile(fn);
+
 	ISceneManager *smgr = device->getSceneManager();
-	IMeshWriter *writer = smgr->createMeshWriter(id);
+	IMesh *mesh = model->getMesh();
+	io::IWriteFile *file;
+	IMeshWriter *writer;
+
+	if (!(flags & E_MESH_EXPORT_ANIM))
+	{
+		clone = (IAnimatedMeshSceneNode*)model->clone();
+		mesh = clone->getMesh();
+	}
+	file = fs->createAndWriteFile(fn);
+	writer = smgr->createMeshWriter(id);
+	writer->writeMesh(file, mesh);
+	writer->drop();
+	file->drop();
+	if (clone)
+		clone->remove();
+	if (scale == 100 && (flags == 0 || flags == E_MESH_EXPORT_ANIM))
+		return;
+
+	IMeshManipulator *manip = smgr->getMeshManipulator();
+	mesh = smgr->getMesh(fn);
+	if (flags & E_MESH_EXPORT_FLIP)
+		manip->flipSurfaces(mesh);
+	if (flags & E_MESH_EXPORT_NORMAL)
+		manip->recalculateNormals(mesh);
+	if (flags & E_MESH_EXPORT_TRANSFORM)
+		manip->transform(mesh, model->getRelativeTransformation());
+	if (scale != 100)
+	{
+		f32 sf = (f32)scale / 100.f;
+		manip->scale(mesh, vector3df(sf, sf, sf));
+	}
+	file = fs->createAndWriteFile(fn);
+	writer = smgr->createMeshWriter(id);
 	writer->writeMesh(file, mesh);
 	writer->drop();
 	file->drop();

@@ -74,6 +74,8 @@ int main()
 		{"screen_height","600"},
 		{"debug_info", "false"},
 		{"debug_flags", "1"},
+		{"export_flags", "1"},
+		{"export_scale", "100"}
 	};
 	conf->load();
 	for (std::map<std::string, std::string>::iterator it = defaults.begin();

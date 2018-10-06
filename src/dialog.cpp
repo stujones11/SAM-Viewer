@@ -92,6 +92,7 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 
 	IGUITab *tab_general = tabs->addTab(L"General");
 	IGUITab *tab_debug = tabs->addTab(L"Debug");
+	IGUITab *tab_export = tabs->addTab(L"Export");
 	IGUISpinBox *spin;
 	IGUICheckBox *check;
 	ColorCtrl *color;
@@ -144,6 +145,29 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 	check = env->addCheckBox(false, rect<s32>(20,170,380,190),	tab_debug,
 		E_DIALOG_ID_DEBUG_BUFFERS, L"Show all mesh buffers");
 	check->setChecked(conf->getInt("debug_flags") & EDS_BBOX_BUFFERS);
+
+	check = env->addCheckBox(false, rect<s32>(20,20,380,40), tab_export,
+		E_DIALOG_ID_EXPORT_ANIM, L"Apply animation pose");
+	check->setChecked(conf->getInt("export_flags") & E_MESH_EXPORT_ANIM);
+	check = env->addCheckBox(false, rect<s32>(20,50,380,70), tab_export,
+		E_DIALOG_ID_EXPORT_TRANSFORM, L"Apply viewer transformations");
+	check->setChecked(conf->getInt("export_flags") & E_MESH_EXPORT_TRANSFORM);
+	check = env->addCheckBox(false, rect<s32>(20,80,380,100), tab_export,
+		E_DIALOG_ID_EXPORT_FLIP, L"Flip Surfaces");
+	check->setChecked(conf->getInt("export_flags") & E_MESH_EXPORT_FLIP);
+	check = env->addCheckBox(false, rect<s32>(20,110,380,130), tab_export,
+		E_DIALOG_ID_EXPORT_NORMAL, L"Recalculate normals");
+	check->setChecked(conf->getInt("export_flags") & E_MESH_EXPORT_NORMAL);
+
+	env->addStaticText(L"Scale:", rect<s32>(20,140,80,160),
+		false, false, tab_export);
+	env->addStaticText(L"%", rect<s32>(80,140,100,160),
+		false, false, tab_export);
+	spin = env->addSpinBox(L"", rect<s32>(100,140,180,160), false, tab_export,
+		E_DIALOG_ID_EXPORT_SCALE);
+	spin->setRange(0, 100);
+	spin->setValue(conf->getInt("export_scale"));
+	spin->setDecimalPlaces(0);
 
 	env->addButton(rect<s32>(315,255,395,285), this,
 		E_DIALOG_ID_SETTINGS_OK, L"OK");
@@ -212,6 +236,22 @@ bool SettingsDialog::OnEvent(const SEvent &event)
 		if (isBoxChecked(E_DIALOG_ID_DEBUG_BUFFERS))
 			flags |= EDS_BBOX_BUFFERS;
 		conf->set("debug_flags", std::to_string(flags));
+
+		flags = 0;
+		if (isBoxChecked(E_DIALOG_ID_EXPORT_ANIM))
+			flags |= E_MESH_EXPORT_ANIM;
+		if (isBoxChecked(E_DIALOG_ID_EXPORT_TRANSFORM))
+			flags |= E_MESH_EXPORT_TRANSFORM;
+		if (isBoxChecked(E_DIALOG_ID_EXPORT_FLIP))
+			flags |= E_MESH_EXPORT_FLIP;
+		if (isBoxChecked(E_DIALOG_ID_EXPORT_NORMAL))
+			flags |= E_MESH_EXPORT_NORMAL;
+		conf->set("export_flags", std::to_string(flags));
+
+		spin = (IGUISpinBox*)
+			getElementFromId(E_DIALOG_ID_EXPORT_SCALE, true);
+		u32 scale = spin->getValue();
+		conf->set("export_scale", std::to_string(scale));
 	}
 	return IGUIElement::OnEvent(event);
 }
