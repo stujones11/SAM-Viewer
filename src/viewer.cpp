@@ -171,8 +171,6 @@ void Viewer::exportStaticMesh(const char *caption, const char **filters,
 	mesh = smgr->getMesh(fn);
 	if (flags & E_MESH_EXPORT_FLIP)
 		manip->flipSurfaces(mesh);
-	if (flags & E_MESH_EXPORT_NORMAL)
-		manip->recalculateNormals(mesh);
 	if (flags & E_MESH_EXPORT_TRANSFORM)
 		manip->transform(mesh, model->getRelativeTransformation());
 	if (scale != 100)
@@ -180,6 +178,9 @@ void Viewer::exportStaticMesh(const char *caption, const char **filters,
 		f32 sf = (f32)scale / 100.f;
 		manip->scale(mesh, vector3df(sf, sf, sf));
 	}
+	if (scale != 100 || flags & E_MESH_EXPORT_NORMAL)
+		manip->recalculateNormals(mesh);
+
 	file = fs->createAndWriteFile(fn);
 	writer = smgr->createMeshWriter(id);
 	writer->writeMesh(file, mesh);
