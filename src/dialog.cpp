@@ -137,7 +137,7 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 		E_DIALOG_ID_DEBUG_SKELETON, L"Show skeleton");
 	check->setChecked(conf->getInt("debug_flags") & EDS_SKELETON);
 	check = env->addCheckBox(false, rect<s32>(20,110,380,130), tab_debug,
-		E_DIALOG_ID_DEBUG_WIREFRANE, L"Wireframe overaly");
+		E_DIALOG_ID_DEBUG_WIREFRANE, L"Wireframe overlay");
 	check->setChecked(conf->getInt("debug_flags") & EDS_MESH_WIRE_OVERLAY);
 	check = env->addCheckBox(false, rect<s32>(20,140,380,160), tab_debug,
 		E_DIALOG_ID_DEBUG_ALPHA, L"Use transparent material");
@@ -153,7 +153,7 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 		E_DIALOG_ID_EXPORT_TRANSFORM, L"Apply viewer transformations");
 	check->setChecked(conf->getInt("export_flags") & E_MESH_EXPORT_TRANSFORM);
 	check = env->addCheckBox(false, rect<s32>(20,80,380,100), tab_export,
-		E_DIALOG_ID_EXPORT_FLIP, L"Flip Surfaces");
+		E_DIALOG_ID_EXPORT_FLIP, L"Flip surfaces");
 	check->setChecked(conf->getInt("export_flags") & E_MESH_EXPORT_FLIP);
 	check = env->addCheckBox(false, rect<s32>(20,110,380,130), tab_export,
 		E_DIALOG_ID_EXPORT_NORMAL, L"Recalculate normals");
@@ -165,7 +165,7 @@ SettingsDialog::SettingsDialog(IGUIEnvironment *env, IGUIElement *parent,
 		false, false, tab_export);
 	spin = env->addSpinBox(L"", rect<s32>(100,140,180,160), false, tab_export,
 		E_DIALOG_ID_EXPORT_SCALE);
-	spin->setRange(0, 100);
+	spin->setRange(0, 10000);
 	spin->setValue(conf->getInt("export_scale"));
 	spin->setDecimalPlaces(0);
 

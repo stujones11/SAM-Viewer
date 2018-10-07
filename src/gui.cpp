@@ -137,8 +137,8 @@ GUI::GUI(IrrlichtDevice *device, Config *config) :
 		skin->setFont(font);
 
 	skin->setColor(EGDC_3D_FACE, SColor(255,232,232,232));
-	skin->setColor(EGDC_3D_DARK_SHADOW, SColor(255,160,160,160));
-	skin->setColor(EGDC_3D_HIGH_LIGHT, SColor(255,248,248,248));
+	skin->setColor(EGDC_3D_DARK_SHADOW, SColor(255,172,172,172));
+	skin->setColor(EGDC_3D_HIGH_LIGHT, SColor(255,212,212,212));
 	skin->setColor(EGDC_3D_LIGHT, SColor(255,255,255,255));
 	skin->setColor(EGDC_3D_SHADOW, SColor(255,196,196,196));
 	skin->setColor(EGDC_ACTIVE_BORDER, SColor(255,232,232,232));
@@ -210,14 +210,13 @@ void GUI::initMenu()
 	submenu->addItem(L"Filters", -1, true, true);
 	submenu->addItem(L"Lights", -1, conf->getBool("lighting"), true);
 	submenu->addSeparator();
-	submenu->addItem(L"Show Wield Item", E_GUI_ID_ENABLE_WIELD, true, false,
+	submenu->addItem(L"Wield Item", E_GUI_ID_ENABLE_WIELD, true, false,
 		conf->getBool("wield_show"), true);
 	submenu->addItem(L"Backface Culling", E_GUI_ID_BACK_FACE_CULL, true, false,
 		conf->getBool("backface_cull"), true);
 	submenu->addItem(L"Lighting", E_GUI_ID_LIGHTING, true, false,
 		conf->getBool("lighting"), true);
-	submenu->addSeparator();
-	submenu->addItem(L"Model Debug Info", E_GUI_ID_DEBUG_INFO, true, false,
+	submenu->addItem(L"Debug Info", E_GUI_ID_DEBUG_INFO, true, false,
 		conf->getBool("debug_info"), true);
 
 	submenu = menu->getSubMenu(2)->getSubMenu(7);
